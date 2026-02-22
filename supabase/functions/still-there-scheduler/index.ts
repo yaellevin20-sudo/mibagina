@@ -1,9 +1,11 @@
 /**
  * still-there-scheduler
  *
- * Scheduled Edge Function (every 5 minutes). Two passes:
+ * Scheduled Edge Function (every 5 minutes). Four passes:
  *   1. Find sessions needing "Still There?" prompt → send Expo push → mark prompted.
  *   2. Mark all check-ins with expires_at <= now() as expired.
+ *   3. Delete expired check-ins older than 24 hours (physical cleanup).
+ *   4. Purge rate_limit_log entries older than 1 hour.
  *
  * Triggered via Supabase Cron or external scheduler.
  * Secured by CRON_SECRET env var (set in Supabase function secrets).
@@ -96,7 +98,37 @@ Deno.serve(async (req: Request) => {
     console.error('[scheduler] mark_expired_checkins:', expireErr.message);
   }
 
-  const body = { prompted, expired_pass_ok: !expireErr };
+  // ── Pass 3: Physical delete of old expired check-ins (>24 h) ────────────────
+  const checkinCutoff = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  const { error: checkinCleanupErr } = await admin
+    .from('check_ins')
+    .delete()
+    .eq('status', 'expired')
+    .lt('expires_at', checkinCutoff);
+
+  if (checkinCleanupErr) {
+    // Non-fatal — log and continue.
+    console.error('[scheduler] check_ins cleanup error:', checkinCleanupErr.message);
+  }
+
+  // ── Pass 4: Purge rate_limit_log entries older than 1 hour ──────────────────
+  const rateLimitCutoff = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+  const { error: rateLimitCleanupErr } = await admin
+    .from('rate_limit_log')
+    .delete()
+    .lt('attempted_at', rateLimitCutoff);
+
+  if (rateLimitCleanupErr) {
+    // Non-fatal — log and continue.
+    console.error('[scheduler] rate_limit_log cleanup error:', rateLimitCleanupErr.message);
+  }
+
+  const body = {
+    prompted,
+    expired_pass_ok:       !expireErr,
+    checkin_cleanup_ok:    !checkinCleanupErr,
+    rate_limit_cleanup_ok: !rateLimitCleanupErr,
+  };
   console.log('[scheduler] done', body);
   return new Response(JSON.stringify(body), {
     headers: { 'Content-Type': 'application/json' },
