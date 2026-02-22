@@ -42,7 +42,7 @@ export async function signIn(email: string, password: string) {
 // Sign up
 // -----------------------------------------------------------------------
 export async function signUp(email: string, password: string) {
-  const { data, error } = await supabase.auth.signUpWithPassword({ email, password });
+  const { data, error } = await supabase.auth.signUp({ email, password });
   if (error) throw error;
   return data;
 }

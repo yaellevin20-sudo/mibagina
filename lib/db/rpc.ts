@@ -25,6 +25,16 @@ export type PlaygroundChildrenResult = {
 };
 
 // -----------------------------------------------------------------------
+// create_guardian(p_name)
+// Creates the guardians row on first login. Idempotent (ON CONFLICT DO NOTHING).
+// Gets email from auth.users server-side — not from client.
+// -----------------------------------------------------------------------
+export async function createGuardian(name: string): Promise<void> {
+  const { error } = await supabase.rpc('create_guardian', { p_name: name });
+  if (error) throw error;
+}
+
+// -----------------------------------------------------------------------
 // touch_last_active()
 // Returns false if guardian row not found — log, do not treat as error.
 // -----------------------------------------------------------------------
