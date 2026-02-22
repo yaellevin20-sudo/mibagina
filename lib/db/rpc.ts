@@ -93,6 +93,39 @@ export type PlaygroundChildrenResult = {
   no_visible_children: boolean;
 };
 
+export type ProfileData = {
+  id: string;
+  name: string;
+  email: string;
+  last_active_at: string;
+};
+
+// -----------------------------------------------------------------------
+// get_my_profile() → ProfileData | null
+// -----------------------------------------------------------------------
+export async function getMyProfile(): Promise<ProfileData | null> {
+  const { data, error } = await supabase.rpc('get_my_profile');
+  if (error) throw error;
+  return data as ProfileData | null;
+}
+
+// -----------------------------------------------------------------------
+// update_display_name(p_name)
+// -----------------------------------------------------------------------
+export async function updateDisplayName(name: string): Promise<void> {
+  const { error } = await supabase.rpc('update_display_name', { p_name: name });
+  if (error) throw error;
+}
+
+// -----------------------------------------------------------------------
+// delete_my_account()
+// DB-side cleanup. Call before invoking delete-account Edge Function.
+// -----------------------------------------------------------------------
+export async function deleteMyAccount(): Promise<void> {
+  const { error } = await supabase.rpc('delete_my_account');
+  if (error) throw error;
+}
+
 // -----------------------------------------------------------------------
 // create_guardian(p_name)
 // Creates the guardians row on first login. Idempotent (ON CONFLICT DO NOTHING).

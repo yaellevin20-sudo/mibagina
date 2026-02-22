@@ -78,3 +78,11 @@ export async function getJoinToken(): Promise<string | null> {
 export async function clearJoinToken() {
   await AsyncStorage.removeItem(JOIN_TOKEN_KEY);
 }
+
+// -----------------------------------------------------------------------
+// Change password (client-side — no Admin API needed)
+// -----------------------------------------------------------------------
+export async function changePassword(newPassword: string): Promise<void> {
+  const { error } = await supabase.auth.updateUser({ password: newPassword });
+  if (error) throw error;
+}

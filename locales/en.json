@@ -79,10 +79,19 @@
   },
   "profile": {
     "title": "My Profile",
+    "display_name": "Display name",
+    "edit_name": "Edit name",
+    "email_label": "Email",
     "change_email": "Change email",
+    "new_email": "New email address",
     "change_password": "Change password",
+    "new_password": "New password",
+    "confirm_password": "Confirm new password",
+    "password_mismatch": "Passwords do not match",
+    "sign_out": "Sign out",
     "delete_account": "Delete account",
-    "delete_confirm": "Are you sure you want to delete your account?"
+    "delete_confirm": "Are you sure you want to delete your account? This cannot be undone.",
+    "deleting": "Deleting account..."
   },
   "join": {
     "title": "Join group",

@@ -79,10 +79,19 @@
   },
   "profile": {
     "title": "הפרופיל שלי",
+    "display_name": "שם תצוגה",
+    "edit_name": "ערוך שם",
+    "email_label": "אימייל",
     "change_email": "שנה אימייל",
+    "new_email": "כתובת אימייל חדשה",
     "change_password": "שנה סיסמה",
+    "new_password": "סיסמה חדשה",
+    "confirm_password": "אימות סיסמה חדשה",
+    "password_mismatch": "הסיסמאות אינן תואמות",
+    "sign_out": "התנתק",
     "delete_account": "מחק חשבון",
-    "delete_confirm": "האם אתה בטוח שברצונך למחוק את החשבון?"
+    "delete_confirm": "האם אתה בטוח שברצונך למחוק את החשבון? לא ניתן לבטל פעולה זו.",
+    "deleting": "מוחק חשבון..."
   },
   "join": {
     "title": "הצטרף לקבוצה",
