@@ -50,6 +50,21 @@ export type GroupMember = {
   children: GroupMemberChild[];
 };
 
+export type PlaygroundRow = {
+  id: string;
+  name: string;
+};
+
+export type CheckinRow = {
+  id: string;
+  child_id: string;
+};
+
+export type CheckinResult = {
+  session_token: string;
+  check_ins: CheckinRow[];
+};
+
 export type NamedChild = {
   child_id: string;
   first_name: string;
@@ -206,6 +221,79 @@ export async function getGroupMembers(groupId: string): Promise<GroupMember[]> {
   const { data, error } = await supabase.rpc('get_group_members', { p_group_id: groupId });
   if (error) throw error;
   return data as GroupMember[];
+}
+
+// -----------------------------------------------------------------------
+// set_push_token(p_token)
+// -----------------------------------------------------------------------
+export async function setPushToken(token: string): Promise<void> {
+  const { error } = await supabase.rpc('set_push_token', { p_token: token });
+  if (error) throw error;
+}
+
+// -----------------------------------------------------------------------
+// get_my_playgrounds()
+// -----------------------------------------------------------------------
+export async function getMyPlaygrounds(): Promise<PlaygroundRow[]> {
+  const { data, error } = await supabase.rpc('get_my_playgrounds');
+  if (error) throw error;
+  return data as PlaygroundRow[];
+}
+
+// -----------------------------------------------------------------------
+// search_playground(p_normalized_name) → [{id, name}]
+// Used for "Did you mean?" deduplication before creating a new playground.
+// -----------------------------------------------------------------------
+export async function searchPlayground(normalizedName: string): Promise<PlaygroundRow[]> {
+  const { data, error } = await supabase.rpc('search_playground', {
+    p_normalized_name: normalizedName,
+  });
+  if (error) throw error;
+  return data as PlaygroundRow[];
+}
+
+// -----------------------------------------------------------------------
+// create_playground(p_name, p_normalized_name) → uuid
+// -----------------------------------------------------------------------
+export async function createPlayground(name: string, normalizedName: string): Promise<string> {
+  const { data, error } = await supabase.rpc('create_playground', {
+    p_name:            name,
+    p_normalized_name: normalizedName,
+  });
+  if (error) throw error;
+  return data as string;
+}
+
+// -----------------------------------------------------------------------
+// post_checkin(p_child_ids, p_playground_id)
+// Returns session_token and check_in ids. session_id is NEVER returned.
+// -----------------------------------------------------------------------
+export async function postCheckin(
+  childIds: string[],
+  playgroundId: string
+): Promise<CheckinResult> {
+  const { data, error } = await supabase.rpc('post_checkin', {
+    p_child_ids:     childIds,
+    p_playground_id: playgroundId,
+  });
+  if (error) throw error;
+  return data as CheckinResult;
+}
+
+// -----------------------------------------------------------------------
+// respond_still_there(p_check_in_id) — "Still here", extends by 30min
+// -----------------------------------------------------------------------
+export async function respondStillThere(checkInId: string): Promise<void> {
+  const { error } = await supabase.rpc('respond_still_there', { p_check_in_id: checkInId });
+  if (error) throw error;
+}
+
+// -----------------------------------------------------------------------
+// leave_checkin(p_check_in_id) — immediately expires the check-in
+// -----------------------------------------------------------------------
+export async function leaveCheckin(checkInId: string): Promise<void> {
+  const { error } = await supabase.rpc('leave_checkin', { p_check_in_id: checkInId });
+  if (error) throw error;
 }
 
 // -----------------------------------------------------------------------

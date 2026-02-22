@@ -14,7 +14,16 @@
     "still_there": "עדיין פה",
     "select_children": "בחר ילדים",
     "select_playground": "בחר גינה",
-    "submit": "צ'ק אין"
+    "add_playground": "הוסף גינה חדשה",
+    "playground_name_label": "שם הגינה",
+    "playground_name_placeholder": "לדוגמה: הגינה של הרחוב שלי",
+    "no_children": "אין ילדים. הוסף ילדים תחילה.",
+    "next": "המשך",
+    "submit": "צ'ק אין",
+    "submitting": "שולח...",
+    "success_title": "בגינה!",
+    "success_body": "עדכנו את הקבוצה שלך. תהנו!",
+    "done": "סיום"
   },
   "children": {
     "siblings_collapsed": "+ {{count}} אחים/אחיות",
@@ -96,7 +105,8 @@
     "save": "שמור",
     "confirm": "אישור",
     "loading": "טוען...",
-    "back_home": "חזור לבית"
+    "back_home": "חזור לבית",
+    "back": "חזרה"
   },
   "errors": {
     "generic": "אירעה שגיאה. אנא נסה שוב.",

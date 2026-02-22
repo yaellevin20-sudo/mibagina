@@ -14,7 +14,16 @@
     "still_there": "Still here",
     "select_children": "Select children",
     "select_playground": "Select playground",
-    "submit": "Check in"
+    "add_playground": "Add new playground",
+    "playground_name_label": "Playground name",
+    "playground_name_placeholder": "e.g. the playground on my street",
+    "no_children": "No children. Add children first.",
+    "next": "Next",
+    "submit": "Check in",
+    "submitting": "Submitting...",
+    "success_title": "You're at the playground!",
+    "success_body": "Your group has been notified. Have fun!",
+    "done": "Done"
   },
   "children": {
     "siblings_collapsed": "+ {{count}} sibling(s)",
@@ -96,7 +105,8 @@
     "save": "Save",
     "confirm": "Confirm",
     "loading": "Loading...",
-    "back_home": "Back to home"
+    "back_home": "Back to home",
+    "back": "Back"
   },
   "errors": {
     "generic": "Something went wrong. Please try again.",
