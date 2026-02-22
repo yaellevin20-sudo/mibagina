@@ -70,10 +70,20 @@
   },
   "join": {
     "title": "הצטרף לקבוצה",
-    "select_children": "בחר אילו ילדים להוסיף",
-    "duplicate_prompt": "האם הילד {{name}} ({{year}}) כבר קיים?",
-    "merge_confirm": "כן, זה אותו ילד",
-    "merge_decline": "לא, ילד חדש"
+    "select_children": "בחר אילו ילדים להוסיף לקבוצה",
+    "invalid_token": "קישור ההזמנה אינו תקין",
+    "expired_token": "קישור ההזמנה פג תוקף",
+    "rate_limited": "יותר מדי ניסיונות. נסה שוב מאוחר יותר",
+    "joining": "מצטרף...",
+    "joined_success": "הצטרפת לקבוצה!",
+    "view_group": "צפה בקבוצה",
+    "no_children_hint": "הוסף ילדים לחשבונך תחילה כדי להצטרף לקבוצה",
+    "go_add_children": "הוסף ילדים",
+    "join_button": "הצטרף לקבוצה",
+    "duplicate_title": "ילד דומה נמצא",
+    "duplicate_message": "האם {{name}} ({{year}}) הוא הילד שלך?",
+    "merge_confirm": "כן, זה הילד שלי",
+    "merge_decline": "לא, הוסף בנפרד"
   },
   "nav": {
     "home": "בית",
@@ -85,7 +95,8 @@
     "cancel": "ביטול",
     "save": "שמור",
     "confirm": "אישור",
-    "loading": "טוען..."
+    "loading": "טוען...",
+    "back_home": "חזור לבית"
   },
   "errors": {
     "generic": "אירעה שגיאה. אנא נסה שוב.",

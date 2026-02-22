@@ -24,8 +24,9 @@ function RootNavigator() {
     if (loading) return;
 
     const inAuthGroup = segments[0] === '(auth)';
+    const inJoinRoute = segments[0] === 'join'; // join/[token].tsx handles its own auth redirect
 
-    if (!session && !inAuthGroup) {
+    if (!session && !inAuthGroup && !inJoinRoute) {
       // Not authenticated — send to login.
       router.replace('/(auth)/login');
     }
