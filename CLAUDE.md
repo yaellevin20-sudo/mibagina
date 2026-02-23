@@ -63,7 +63,7 @@ Add to this table as new strings are introduced.
 
 ## Auth
 
-- Email/password only — no OTP, no OAuth. JWT expiry: 1h, refresh enabled. Email verification required.
+- Email/password or Google OAuth. JWT expiry: 1h, refresh enabled. No email verification required (disabled in Supabase).
 - First login with no `guardians` row: prompt display name → create via server-side function.
 - Call `touch_last_active()` after login and session restore. Log if returns `false`.
 - Inactivity: `last_active_at > 6 months` → sign out, require full re-login with email/password. No exceptions.

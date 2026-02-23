@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as WebBrowser from 'expo-web-browser';
+import * as Linking from 'expo-linking';
 import { supabase } from './supabase';
-import { touchLastActive } from './db/rpc';
 
 const JOIN_TOKEN_KEY = 'mibagina:pending_join_token';
 const INACTIVITY_MONTHS = 6;
@@ -17,25 +18,62 @@ export function isInactive(lastActiveAt: string): boolean {
 }
 
 // -----------------------------------------------------------------------
-// Sign in
-// Calls touch_last_active() after successful auth.
-// Returns { inactivity: true } if guardian hasn't been active in 6 months.
+// Sign in (email/password)
+// touchLastActive() is called in routeAfterAuth (login.tsx) to avoid
+// double-calling for Google OAuth which also triggers onAuthStateChange.
 // -----------------------------------------------------------------------
 export async function signIn(email: string, password: string) {
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) throw error;
+  return data;
+}
 
-  // Best-effort: log false (guardian row not found) but do not hard error.
-  try {
-    const found = await touchLastActive();
-    if (!found) console.warn('[auth] touch_last_active returned false — guardian row not found');
-  } catch (e) {
-    console.warn('[auth] touch_last_active failed', e);
+// -----------------------------------------------------------------------
+// Sign in with Google (OAuth)
+// Opens an in-app browser, parses tokens from result URL, calls setSession.
+// maybeCompleteAuthSession() must be called at the screen level, not here.
+// -----------------------------------------------------------------------
+export async function signInWithGoogle(): Promise<void> {
+  const redirectTo = Linking.createURL('auth/callback');
+
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo, skipBrowserRedirect: true },
+  });
+  if (error) throw error;
+  if (!data.url) throw new Error('No OAuth URL returned');
+
+  const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
+
+  if (result.type === 'cancel') {
+    throw new Error('cancelled'); // caught silently by caller
   }
 
-  // Check inactivity using last_active_at from guardians table via session metadata.
-  // Full inactivity check is performed in AuthContext on session restore.
-  return data;
+  if (result.type === 'success' && result.url) {
+    // Parse access_token + refresh_token from the fragment
+    const fragment = result.url.split('#')[1] ?? '';
+    const params = new URLSearchParams(fragment);
+    const access_token = params.get('access_token');
+    const refresh_token = params.get('refresh_token');
+
+    if (!access_token || !refresh_token) {
+      // Fallback: the Linking deep link handler in _layout.tsx will handle it
+      return;
+    }
+
+    const { error: sessionError } = await supabase.auth.setSession({ access_token, refresh_token });
+    if (sessionError) throw sessionError;
+    // onAuthStateChange SIGNED_IN → AuthContext updates → screen useEffect routes
+  }
+}
+
+// -----------------------------------------------------------------------
+// Send password reset email
+// -----------------------------------------------------------------------
+export async function sendPasswordReset(email: string): Promise<void> {
+  const redirectTo = Linking.createURL('reset-password');
+  const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
+  if (error) throw error;
 }
 
 // -----------------------------------------------------------------------

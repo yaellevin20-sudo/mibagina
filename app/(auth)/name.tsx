@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Text,
   TextInput,
@@ -10,6 +10,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import { supabase } from '../../lib/supabase';
 import { createGuardian, touchLastActive } from '../../lib/db/rpc';
 import { getJoinToken } from '../../lib/auth';
 
@@ -18,8 +19,19 @@ export default function NameScreen() {
   const router = useRouter();
 
   const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Pre-fill name from Google user metadata (only if truthy)
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) return;
+      const googleName = user.user_metadata?.full_name as string | undefined;
+      if (googleName) setName(googleName);
+      if (user.email) setEmail(user.email);
+    });
+  }, []);
 
   async function handleContinue() {
     const trimmed = name.trim();
@@ -64,9 +76,13 @@ export default function NameScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <Text className="text-3xl font-bold text-center mb-2">mi bagina</Text>
-        <Text className="text-base text-gray-600 text-center mb-8">
-          {t('auth.display_name')}
+        <Text className="text-base text-gray-600 text-center mb-2">
+          {t('auth.complete_profile')}
         </Text>
+
+        {email ? (
+          <Text className="text-sm text-gray-400 text-center mb-8">{email}</Text>
+        ) : null}
 
         {error && (
           <Text className="text-red-500 text-sm mb-4 text-center">{error}</Text>

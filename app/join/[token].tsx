@@ -10,8 +10,9 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import Toast from 'react-native-toast-message';
 import { useAuth } from '../../contexts/AuthContext';
-import { storeJoinToken } from '../../lib/auth';
+import { storeJoinToken, clearJoinToken } from '../../lib/auth';
 import { getMyChildren, type ChildRow } from '../../lib/db/rpc';
 import { validateInviteToken, joinGroup, type DuplicateInfo } from '../../lib/db/join';
 
@@ -22,8 +23,7 @@ type Phase =
   | { name: 'loading' }
   | { name: 'error'; messageKey: string }
   | { name: 'pick'; groupId: string; groupName: string }
-  | { name: 'submitting' }
-  | { name: 'success'; groupName: string };
+  | { name: 'submitting' };
 
 // ---------------------------------------------------------------------------
 // Join Screen
@@ -37,7 +37,6 @@ export default function JoinScreen() {
   const [phase, setPhase]           = useState<Phase>({ name: 'loading' });
   const [children, setChildren]     = useState<ChildRow[]>([]);
   const [selected, setSelected]     = useState<Set<string>>(new Set());
-  const [childrenLoading, setChildrenLoading] = useState(false);
 
   // ── Handle unauthenticated deep link ──────────────────────────────────────
   useEffect(() => {
@@ -94,7 +93,9 @@ export default function JoinScreen() {
       const result = await joinGroup({ token, group_id: groupId, child_ids: childIds });
 
       if (result.status === 'done') {
-        setPhase({ name: 'success', groupName });
+        await clearJoinToken();
+        Toast.show({ type: 'success', text1: t('join.success_toast'), position: 'top', visibilityTime: 3000 });
+        router.replace('/(tabs)/groups');
         return;
       }
 
@@ -124,7 +125,9 @@ export default function JoinScreen() {
       });
 
       if (final.status === 'done') {
-        setPhase({ name: 'success', groupName });
+        await clearJoinToken();
+        Toast.show({ type: 'success', text1: t('join.success_toast'), position: 'top', visibilityTime: 3000 });
+        router.replace('/(tabs)/groups');
       }
     } catch (e: any) {
       Alert.alert(t('errors.generic'), e.message);
@@ -152,21 +155,6 @@ export default function JoinScreen() {
           onPress={() => router.replace('/(tabs)')}
         >
           <Text className="text-white font-semibold">{t('common.back_home')}</Text>
-        </TouchableOpacity>
-      </SafeAreaView>
-    );
-  }
-
-  if (phase.name === 'success') {
-    return (
-      <SafeAreaView className="flex-1 bg-gray-50 items-center justify-center px-6">
-        <Text className="text-2xl font-bold text-gray-900 mb-2">{t('join.joined_success')}</Text>
-        <Text className="text-gray-500 text-base mb-8">{phase.groupName}</Text>
-        <TouchableOpacity
-          className="bg-green-600 rounded-lg px-8 py-3"
-          onPress={() => router.replace('/(tabs)/groups')}
-        >
-          <Text className="text-white font-semibold">{t('join.view_group')}</Text>
         </TouchableOpacity>
       </SafeAreaView>
     );

@@ -75,7 +75,14 @@
     "logout": "התנתקות",
     "display_name": "שם תצוגה",
     "display_name_placeholder": "איך תרצה שיקראו לך?",
-    "email_verification_required": "יש לאמת את כתובת האימייל לפני ההצטרפות לקבוצות"
+    "email_verification_required": "יש לאמת את כתובת האימייל לפני ההצטרפות לקבוצות",
+    "continue_with_google": "המשך עם Google",
+    "forgot_password": "שכחת סיסמה?",
+    "reset_password_title": "איפוס סיסמה",
+    "reset_password_sent": "שלחנו לך אימייל לאיפוס הסיסמה",
+    "new_password": "סיסמה חדשה",
+    "complete_profile": "בואו נכיר",
+    "email_in_use": "כתובת האימייל כבר רשומה. שכחת סיסמה?"
   },
   "profile": {
     "title": "הפרופיל שלי",
@@ -101,6 +108,7 @@
     "rate_limited": "יותר מדי ניסיונות. נסה שוב מאוחר יותר",
     "joining": "מצטרף...",
     "joined_success": "הצטרפת לקבוצה!",
+    "success_toast": "הצטרפת לקבוצה בהצלחה!",
     "view_group": "צפה בקבוצה",
     "no_children_hint": "הוסף ילדים לחשבונך תחילה כדי להצטרף לקבוצה",
     "go_add_children": "הוסף ילדים",
@@ -122,7 +130,8 @@
     "confirm": "אישור",
     "loading": "טוען...",
     "back_home": "חזור לבית",
-    "back": "חזרה"
+    "back": "חזרה",
+    "or": "או"
   },
   "errors": {
     "generic": "אירעה שגיאה. אנא נסה שוב.",
