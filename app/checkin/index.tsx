@@ -16,6 +16,7 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { getMyChildren, getMyPlaygrounds, searchPlayground, createPlayground, postCheckin, type ChildRow, type PlaygroundRow } from '../../lib/db/rpc';
 import { normalizePlaygroundName } from '../../lib/playground';
+import { notifyGroupCheckin } from '../../lib/notifications';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -79,6 +80,7 @@ export default function CheckinScreen() {
     setStep({ name: 'submitting' });
     try {
       await postCheckin(childIds, playgroundId);
+      notifyGroupCheckin(playgroundId); // fire-and-forget — non-blocking
       setStep({ name: 'success' });
     } catch (e: any) {
       Alert.alert(t('errors.generic'), e.message);
@@ -132,6 +134,7 @@ export default function CheckinScreen() {
 
       setStep({ name: 'submitting' });
       await postCheckin(childIds, playgroundId);
+      notifyGroupCheckin(playgroundId); // fire-and-forget — non-blocking
       setStep({ name: 'success' });
     } catch (e: any) {
       Alert.alert(t('errors.generic'), e.message);

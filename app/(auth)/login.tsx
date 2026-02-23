@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next';
 import * as WebBrowser from 'expo-web-browser';
 import { signIn, signInWithGoogle, sendPasswordReset, getJoinToken } from '../../lib/auth';
 import { touchLastActive } from '../../lib/db/rpc';
+import { registerForPushNotifications } from '../../lib/notifications';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -67,6 +68,7 @@ export default function LoginScreen() {
       return;
     }
 
+    registerForPushNotifications(); // fire-and-forget — non-blocking
     const pendingToken = await getJoinToken();
     if (pendingToken) {
       router.replace(`/join/${pendingToken}`);

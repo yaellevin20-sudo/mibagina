@@ -15,7 +15,8 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.mibagina.app"
+      "bundleIdentifier": "com.mibagina.app",
+      "infoPlist": { "UIBackgroundModes": ["remote-notification"] }
     },
     "android": {
       "adaptiveIcon": {
@@ -27,10 +28,30 @@
       "intentFilters": [
         {
           "action": "VIEW",
-          "data": [{ "scheme": "mibagina" }],
-          "category": ["BROWSABLE", "DEFAULT"]
+          "data": [
+            {
+              "scheme": "mibagina"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        },
+        {
+          "action": "VIEW",
+          "data": [
+            {
+              "scheme": "mibagina"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         }
-      ]
+      ],
+      "package": "com.mibagina.app"
     },
     "web": {
       "favicon": "./assets/favicon.png",
@@ -39,7 +60,14 @@
     "plugins": [
       "expo-router",
       "expo-secure-store",
-      "expo-web-browser"
-    ]
+      "expo-web-browser",
+      ["expo-notifications", { "icon": "./assets/icon.png", "color": "#16a34a", "defaultChannel": "still-there" }]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "cd1ed03c-0100-4477-8ba9-ffc8f89a55b9"
+      }
+    }
   }
 }
