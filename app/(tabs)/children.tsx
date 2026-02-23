@@ -13,7 +13,9 @@ import {
   Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import { getJoinToken } from '../../lib/auth';
 import {
   getMyChildren,
   addChild,
@@ -214,9 +216,15 @@ function ChildCard({
 // ---------------------------------------------------------------------------
 export default function ChildrenScreen() {
   const { t } = useTranslation();
+  const router = useRouter();
   const [children, setChildren]       = useState<ChildRow[]>([]);
   const [loading, setLoading]         = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [pendingJoinToken, setPendingJoinToken] = useState<string | null>(null);
+
+  useEffect(() => {
+    getJoinToken().then(setPendingJoinToken).catch(() => {});
+  }, []);
 
   const load = useCallback(async () => {
     try {
@@ -286,6 +294,16 @@ export default function ChildrenScreen() {
           <Text className="text-green-600 font-semibold text-base">{t('children.add_child')}</Text>
         </TouchableOpacity>
       </View>
+
+      {pendingJoinToken && (
+        <TouchableOpacity
+          className="bg-green-50 border-b border-green-200 px-4 py-3 flex-row justify-between items-center"
+          onPress={() => router.replace(`/join/${pendingJoinToken}`)}
+        >
+          <Text className="text-green-800 text-sm font-medium">{t('children.back_to_join')}</Text>
+          <Text className="text-green-600 text-sm">→</Text>
+        </TouchableOpacity>
+      )}
 
       {loading ? (
         <ActivityIndicator size="large" color="#16a34a" style={{ marginTop: 48 }} />

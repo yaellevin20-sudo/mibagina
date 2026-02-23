@@ -44,7 +44,8 @@
     "date_of_birth": "תאריך לידה",
     "date_of_birth_hint": "YYYY-MM-DD",
     "confirm_remove": "להסיר את {{name}}?",
-    "years_old": "בן/בת {{age}}"
+    "years_old": "בן/בת {{age}}",
+    "back_to_join": "סיימת להוסיף ילדים? לחץ להמשך ההצטרפות לקבוצה →"
   },
   "groups": {
     "create": "צור קבוצה",

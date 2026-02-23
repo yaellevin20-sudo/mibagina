@@ -44,7 +44,8 @@
     "date_of_birth": "Date of birth",
     "date_of_birth_hint": "YYYY-MM-DD",
     "confirm_remove": "Remove {{name}}?",
-    "years_old": "Age {{age}}"
+    "years_old": "Age {{age}}",
+    "back_to_join": "Done adding children? Tap to continue joining the group →"
   },
   "groups": {
     "create": "Create group",

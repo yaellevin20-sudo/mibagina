@@ -12,7 +12,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Link, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import * as WebBrowser from 'expo-web-browser';
-import { signUp, signInWithGoogle } from '../../lib/auth';
+import { signUp, signInWithGoogle, getJoinToken } from '../../lib/auth';
+import { touchLastActive } from '../../lib/db/rpc';
+import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 
 // Required for OAuth redirect completion on iOS
@@ -32,14 +34,25 @@ export default function SignupScreen() {
   // Prevent double-routing when Google OAuth triggers session
   const hasRouted = useRef(false);
 
-  // Route after Google OAuth sets a session (email signup always goes to name.tsx directly)
+  // Route after Google OAuth sets a session (email signup routes to name.tsx directly in handleSignup)
   useEffect(() => {
     if (!session || hasRouted.current) return;
     hasRouted.current = true;
-    // Google OAuth: session exists after sign-in
-    // Guardian row not yet created for new users → name.tsx will handle routing
-    router.replace('/(auth)/name');
+    routeAfterAuth(session.user.id);
   }, [session]);
+
+  async function routeAfterAuth(userId: string) {
+    try { await touchLastActive(); } catch {}
+    const { data: guardian } = await supabase
+      .from('guardians')
+      .select('id')
+      .eq('id', userId)
+      .maybeSingle();
+    if (!guardian) { router.replace('/(auth)/name'); return; }
+    const pendingToken = await getJoinToken();
+    if (pendingToken) { router.replace(`/join/${pendingToken}`); return; }
+    router.replace('/(tabs)');
+  }
 
   async function handleSignup() {
     setError(null);
