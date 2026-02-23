@@ -64,6 +64,9 @@ Deno.serve(async (req: Request) => {
     });
   }
 
+  // Each row is (guardian_id, group_id) — one notification per group per guardian.
+  // Same push token appearing multiple times is intentional: different groups
+  // have different children in scope, so each notification has different content.
   const notifyList: NotificationTarget[] = targets ?? [];
   let sent = 0;
 
