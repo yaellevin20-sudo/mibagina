@@ -13,7 +13,6 @@ import { useTranslation } from 'react-i18next';
 import { supabase } from '../../lib/supabase';
 import { createGuardian, touchLastActive } from '../../lib/db/rpc';
 import { getJoinToken } from '../../lib/auth';
-import { registerForPushNotifications } from '../../lib/notifications';
 
 export default function NameScreen() {
   const { t } = useTranslation();
@@ -55,8 +54,6 @@ export default function NameScreen() {
         console.warn('[name] touch_last_active failed', e);
       }
 
-      registerForPushNotifications(); // fire-and-forget — non-blocking
-
       // Resume pending join flow if the user arrived via deep link.
       const pendingToken = await getJoinToken();
       if (pendingToken) {
@@ -64,7 +61,8 @@ export default function NameScreen() {
         return;
       }
 
-      router.replace('/(tabs)');
+      // New users go through the notifications permission screen before home.
+      router.replace('/(auth)/notifications-ask');
     } catch (e: any) {
       setError(e.message ?? t('errors.generic'));
     } finally {

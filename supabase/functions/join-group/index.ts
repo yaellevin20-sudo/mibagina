@@ -79,9 +79,17 @@ Deno.serve(async (req: Request) => {
   // ── Validate token ───────────────────────────────────────────────────────────
   const { data: group } = await admin
     .from('groups')
-    .select('id, name, expires_at')
+    .select('id, name, expires_at, created_by, guardians!groups_created_by_fkey(name)')
     .eq('invite_token', token)
-    .maybeSingle();
+    .maybeSingle() as {
+      data: {
+        id: string;
+        name: string;
+        expires_at: string | null;
+        created_by: string | null;
+        guardians: { name: string } | null;
+      } | null;
+    };
 
   if (!group) return json({ error: 'invalid_token' }, 404);
   if (group.expires_at && new Date(group.expires_at) < new Date()) {
@@ -90,7 +98,11 @@ Deno.serve(async (req: Request) => {
 
   // ── action: validate ─────────────────────────────────────────────────────────
   if (action === 'validate') {
-    return json({ group_id: group.id, group_name: group.name });
+    return json({
+      group_id:     group.id,
+      group_name:   group.name,
+      inviter_name: group.guardians?.name ?? null,
+    });
   }
 
   // ── action: join ─────────────────────────────────────────────────────────────
@@ -109,6 +121,18 @@ Deno.serve(async (req: Request) => {
 
     if (!owned || owned.length !== child_ids.length) {
       return json({ error: 'forbidden' }, 403);
+    }
+
+    // Check if all selected children are already members of this group.
+    const { data: existingMemberships } = await admin
+      .from('guardian_child_groups')
+      .select('child_id')
+      .eq('group_id', group.id)
+      .eq('guardian_id', guardianId)
+      .in('child_id', child_ids);
+
+    if ((existingMemberships?.length ?? 0) === child_ids.length) {
+      return json({ status: 'already_member', group_id: group.id, group_name: group.name });
     }
 
     // Fetch children data for duplicate detection.

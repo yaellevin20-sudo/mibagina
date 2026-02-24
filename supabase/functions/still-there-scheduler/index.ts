@@ -63,6 +63,7 @@ Deno.serve(async (req: Request) => {
             to: session.expo_push_token,
             title: 'עדיין שם? / Still there?',
             body: childNames,
+            categoryId: 'still_there',
             data: {
               type: 'still_there_prompt',
               session_token: session.session_token, // session_id is NOT included

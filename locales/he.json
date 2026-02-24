@@ -7,7 +7,18 @@
     "no_groups": "אין לך קבוצות עדיין. צור קבוצה או הצטרף לאחת!",
     "group_selector_placeholder": "בחר קבוצה",
     "anonymous_age": "גיל {{age}} (אנונימי)",
-    "collapse_siblings": "הסתר"
+    "collapse_siblings": "הסתר",
+    "active_checkin_title": "אנחנו שם",
+    "switch_playground": "החלפת גינה",
+    "end_visit": "סיום ביקור",
+    "confirm_end_visit": "לצאת מ{{name}}?",
+    "confirm_end_visit_yes": "כן, יוצאים",
+    "confirm_end_visit_no": "לא עדיין",
+    "setup_banner": "כמעט מוכנה",
+    "setup_add_children": "הוסיפי ילד לחשבון",
+    "setup_join_group": "הצטרפי לקבוצה",
+    "notification_denied_banner": "אפשרי התראות כדי לדעת מתי חברים בגינה",
+    "notification_denied_settings": "פתח הגדרות"
   },
   "playground": {
     "title": "מי בגינה?",
@@ -30,7 +41,10 @@
     "submitting": "שולח...",
     "success_title": "בגינה!",
     "success_body": "עדכנו את הקבוצה שלך. תהנו!",
-    "done": "סיום"
+    "done": "סיום",
+    "leaving_confirm": "לצאת מ{{name}}?",
+    "search_placeholder": "חפשי גינה",
+    "add_new_with_name": "הוסיפי \"{{name}}\" כגינה חדשה"
   },
   "children": {
     "siblings_collapsed": "+ {{count}} אחים/אחיות",
@@ -62,11 +76,26 @@
     "rename_title": "שנה שם קבוצה",
     "view_members": "חברי קבוצה",
     "leave_group": "עזוב קבוצה",
+    "delete_group": "מחק קבוצה",
+    "confirm_delete_group": "למחוק את \"{{name}}\"? לא ניתן לבטל פעולה זו.",
+    "delete_active_checkins_error_title": "לא ניתן למחוק",
+    "delete_active_checkins_error": "ילדים מבצעים צ'ק אין כרגע בגינה. יש להמתין עד שכולם יסיימו לפני מחיקת הקבוצה.",
+    "transfer_ownership_title": "העבר ניהול",
+    "transfer_ownership_prompt": "בחר מנהל חדש לפני עזיבת הקבוצה:",
+    "transfer_ownership_confirm": "למנות את {{name}} כמנהל החדש ולעזוב?",
+    "make_owner": "בחר",
     "confirm_remove_guardian": "להסיר את {{name}} מהקבוצה?",
     "confirm_remove_child": "להסיר את {{name}} מהקבוצה?",
     "confirm_regenerate": "לחדש את קישור ההזמנה? הקישור הנוכחי יפסיק לעבוד.",
+    "group_deleted_toast": "הקבוצה \"{{name}}\" כבר לא קיימת",
     "last_admin_error": "לא ניתן להסיר את המנהל האחרון — מנה מנהל אחר תחילה",
-    "admin_badge": "מנהל"
+    "admin_badge": "מנהל",
+    "children_count_one": "ילד אחד",
+    "children_count_other": "{{count}} ילדים",
+    "stay_in_group": "האם את רוצה להישאר בקבוצה?",
+    "stay_in_group_yes": "כן, אני נשארת",
+    "stay_in_group_no": "לא, אצא",
+    "already_member": "את כבר חברה בקבוצה הזו"
   },
   "auth": {
     "email": "אימייל",
@@ -83,7 +112,13 @@
     "reset_password_sent": "שלחנו לך אימייל לאיפוס הסיסמה",
     "new_password": "סיסמה חדשה",
     "complete_profile": "בואו נכיר",
-    "email_in_use": "כתובת האימייל כבר רשומה. שכחת סיסמה?"
+    "email_in_use": "כתובת האימייל כבר רשומה. שכחת סיסמה?",
+    "allow_notifications": "אפשרי התראות",
+    "notifications_subtitle": "תדעי כשחברים בגינה",
+    "notifications_denied_title": "אין גישה להתראות",
+    "notifications_denied_body": "כדי לקבל התראות, פתחי את הגדרות האפליקציה ואפשרי התראות.",
+    "notifications_open_settings": "פתח הגדרות",
+    "skip": "דלג"
   },
   "profile": {
     "title": "הפרופיל שלי",
@@ -99,7 +134,8 @@
     "sign_out": "התנתק",
     "delete_account": "מחק חשבון",
     "delete_confirm": "האם אתה בטוח שברצונך למחוק את החשבון? לא ניתן לבטל פעולה זו.",
-    "deleting": "מוחק חשבון..."
+    "deleting": "מוחק חשבון...",
+    "setup_incomplete": "השלימי את ההגדרות"
   },
   "join": {
     "title": "הצטרף לקבוצה",
@@ -117,13 +153,26 @@
     "duplicate_title": "ילד דומה נמצא",
     "duplicate_message": "האם {{name}} ({{year}}) הוא הילד שלך?",
     "merge_confirm": "כן, זה הילד שלי",
-    "merge_decline": "לא, הוסף בנפרד"
+    "merge_decline": "לא, הוסף בנפרד",
+    "invited_by": "{{name}} מזמינה אותך להצטרף ל",
+    "add_child_first": "הוסיפי ילד עכשיו",
+    "already_member": "את כבר חברה בקבוצה הזו"
   },
   "nav": {
     "home": "בית",
     "children": "ילדים",
     "groups": "קבוצות",
-    "profile": "פרופיל"
+    "profile": "פרופיל",
+    "back": "חזרה"
+  },
+  "onboarding": {
+    "children_title": "הילדים שלי",
+    "children_subtitle": "הוסיפי את הילדים שלך כדי שחברי הקבוצה ידעו מי בגינה",
+    "groups_title": "הקבוצה שלי",
+    "groups_subtitle": "הצטרפי לקבוצה או צרי קבוצה חדשה עם חברות",
+    "skip": "דלג",
+    "continue": "המשך",
+    "done": "סיום"
   },
   "common": {
     "cancel": "ביטול",

@@ -27,6 +27,11 @@ export type GroupCheckinPayload = {
   group_name: string;
 };
 
+export type GroupDeletedPayload = {
+  type: 'group_deleted';
+  group_name: string;
+};
+
 // -----------------------------------------------------------------------
 // setupAndroidChannel
 // -----------------------------------------------------------------------
@@ -54,6 +59,21 @@ export async function registerForPushNotifications(): Promise<void> {
 
     await setupAndroidChannel();
 
+    // Register still_there category for quick-action buttons (no app open needed).
+    // categoryId in the push payload must match this identifier exactly.
+    await Notifications.setNotificationCategoryAsync('still_there', [
+      {
+        identifier: 'still_here',
+        buttonTitle: 'עדיין כאן',
+        options: { isDestructive: false, isAuthenticationRequired: false, opensAppToForeground: false },
+      },
+      {
+        identifier: 'leaving',
+        buttonTitle: 'יוצאת',
+        options: { isDestructive: true, isAuthenticationRequired: false, opensAppToForeground: false },
+      },
+    ]);
+
     const { status: existingStatus } = await Notifications.getPermissionsAsync();
     let finalStatus = existingStatus;
     if (existingStatus !== 'granted') {
@@ -78,28 +98,18 @@ export async function registerForPushNotifications(): Promise<void> {
 }
 
 // -----------------------------------------------------------------------
-// notifyGroupCheckin
-// Fire-and-forget call to the notify-group-checkin Edge Function.
-// Non-critical — silent on error.
+// enqueueGroupNotification
+// Fire-and-forget RPC call that inserts a pending batch into notification_queue.
+// The dispatch-notifications edge function (runs every minute) claims due
+// batches and sends bundled Expo pushes. Non-critical — silent on error.
 // -----------------------------------------------------------------------
-export async function notifyGroupCheckin(playgroundId: string): Promise<void> {
+export async function enqueueGroupNotification(playgroundId: string): Promise<void> {
   try {
-    const { data: sessionData } = await supabase.auth.getSession();
-    const jwt = sessionData?.session?.access_token;
-    if (!jwt) return;
-
-    const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
-    if (!supabaseUrl) return;
-
-    fetch(`${supabaseUrl}/functions/v1/notify-group-checkin`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${jwt}`,
-      },
-      body: JSON.stringify({ playground_id: playgroundId }),
-    }).catch((e) => console.warn('[push] notifyGroupCheckin fetch error', e));
+    const { error } = await supabase.rpc('enqueue_group_notification', {
+      p_playground_id: playgroundId,
+    });
+    if (error) console.warn('[notify] enqueueGroupNotification error:', error.message);
   } catch (e) {
-    console.warn('[push] notifyGroupCheckin error', e);
+    console.warn('[notify] enqueueGroupNotification error:', e);
   }
 }

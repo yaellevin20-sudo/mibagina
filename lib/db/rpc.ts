@@ -10,6 +10,11 @@ export type CoGuardianInfo = {
   can_see_my_checkins: boolean;
 };
 
+export type ChildGroupInfo = {
+  id: string;
+  name: string;
+};
+
 export type ChildRow = {
   id: string;
   first_name: string;
@@ -17,6 +22,7 @@ export type ChildRow = {
   age_years: number;
   created_at: string;
   co_guardians: CoGuardianInfo[];
+  groups: ChildGroupInfo[];
 };
 
 export type MyGroupChild = {
@@ -34,6 +40,7 @@ export type GroupRow = {
   is_admin: boolean;
   my_children: MyGroupChild[];
   member_count: number;
+  child_count: number;
 };
 
 export type GroupMemberChild = {
@@ -68,9 +75,27 @@ export type CheckinResult = {
 export type HomeNamedChild = {
   child_id: string;
   first_name: string;
+  last_name: string;
   age_years: number;
   check_in_id: string;
   posted_by: string;
+  checked_in_at: string;
+};
+
+export type ActiveCheckinResult = {
+  playground_id: string;
+  playground_name: string;
+  child_names: string[];
+  child_ids: string[];
+  check_in_ids: string[];
+  checked_in_at: string;
+} | null;
+
+export type ChildGroupContext = {
+  other_guardians_count: number;
+  is_last_child_for_me: boolean;
+  owner_would_be_removed: boolean;
+  active_checkins_exist: boolean;
 };
 
 export type HomeFeedItem = {
@@ -234,6 +259,49 @@ export async function regenerateInviteToken(groupId: string): Promise<string> {
 }
 
 // -----------------------------------------------------------------------
+// transfer_group_ownership(p_group_id, p_new_admin_id)
+// Promotes another member to admin. Caller must be admin.
+// Call remove_guardian_from_group separately to complete the leave.
+// -----------------------------------------------------------------------
+export async function transferGroupOwnership(
+  groupId: string,
+  newAdminId: string
+): Promise<void> {
+  const { error } = await supabase.rpc('transfer_group_ownership', {
+    p_group_id:     groupId,
+    p_new_admin_id: newAdminId,
+  });
+  if (error) throw error;
+}
+
+// -----------------------------------------------------------------------
+// deleteGroup(groupId)
+// Calls the delete-group edge function which:
+//   1. Verifies caller is admin
+//   2. Blocks if active check-ins exist (throws 'Active check-ins exist')
+//   3. Notifies other members via push
+//   4. Deletes the group
+// -----------------------------------------------------------------------
+export async function deleteGroup(groupId: string): Promise<void> {
+  const { data: { session } } = await supabase.auth.getSession();
+  const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
+  if (!session?.access_token) throw new Error('Not authenticated');
+  if (!supabaseUrl) throw new Error('Supabase URL not configured');
+  const res = await fetch(`${supabaseUrl}/functions/v1/delete-group`, {
+    method:  'POST',
+    headers: {
+      Authorization:  `Bearer ${session.access_token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ group_id: groupId }),
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error ?? 'delete_group_failed');
+  }
+}
+
+// -----------------------------------------------------------------------
 // remove_guardian_from_group(p_group_id, p_guardian_id)
 // Admin removes another guardian, or self-leave.
 // Throws if last admin.
@@ -356,6 +424,57 @@ export async function respondStillThere(checkInId: string): Promise<void> {
 // -----------------------------------------------------------------------
 export async function leaveCheckin(checkInId: string): Promise<void> {
   const { error } = await supabase.rpc('leave_checkin', { p_check_in_id: checkInId });
+  if (error) throw error;
+}
+
+// -----------------------------------------------------------------------
+// get_my_active_checkin() → ActiveCheckinResult
+// Returns the caller's active check-in if any.
+// Filters: status='active' AND expires_at > now()
+// -----------------------------------------------------------------------
+export async function getMyActiveCheckin(): Promise<ActiveCheckinResult> {
+  const { data, error } = await supabase.rpc('get_my_active_checkin');
+  if (error) throw error;
+  return data as ActiveCheckinResult;
+}
+
+// -----------------------------------------------------------------------
+// add_children_to_group(p_group_id, p_child_ids)
+// Adds caller's children to a group they admin. Sets co_guardian_visibility.
+// -----------------------------------------------------------------------
+export async function addChildrenToGroup(
+  groupId: string,
+  childIds: string[]
+): Promise<void> {
+  const { error } = await supabase.rpc('add_children_to_group', {
+    p_group_id:  groupId,
+    p_child_ids: childIds,
+  });
+  if (error) throw error;
+}
+
+// -----------------------------------------------------------------------
+// get_child_group_context(p_group_id, p_child_id) → ChildGroupContext
+// Pre-check before removing a child from a group.
+// -----------------------------------------------------------------------
+export async function getChildGroupContext(
+  groupId: string,
+  childId: string
+): Promise<ChildGroupContext> {
+  const { data, error } = await supabase.rpc('get_child_group_context', {
+    p_group_id: groupId,
+    p_child_id: childId,
+  });
+  if (error) throw error;
+  return data as ChildGroupContext;
+}
+
+// -----------------------------------------------------------------------
+// demote_to_member(p_group_id)
+// Removes caller from group_admins but keeps them as a regular member.
+// -----------------------------------------------------------------------
+export async function demoteToMember(groupId: string): Promise<void> {
+  const { error } = await supabase.rpc('demote_to_member', { p_group_id: groupId });
   if (error) throw error;
 }
 

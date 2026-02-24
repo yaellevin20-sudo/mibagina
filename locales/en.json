@@ -7,7 +7,18 @@
     "no_groups": "You have no groups yet. Create one or join one!",
     "group_selector_placeholder": "Select a group",
     "anonymous_age": "Age {{age}} (anonymous)",
-    "collapse_siblings": "Collapse"
+    "collapse_siblings": "Collapse",
+    "active_checkin_title": "We're there",
+    "switch_playground": "Switch playground",
+    "end_visit": "End visit",
+    "confirm_end_visit": "Leave {{name}}?",
+    "confirm_end_visit_yes": "Yes, leave",
+    "confirm_end_visit_no": "Not yet",
+    "setup_banner": "Almost ready",
+    "setup_add_children": "Add a child to your account",
+    "setup_join_group": "Join a group",
+    "notification_denied_banner": "Allow notifications to know when friends are at the playground",
+    "notification_denied_settings": "Open settings"
   },
   "playground": {
     "title": "Who's here?",
@@ -30,7 +41,10 @@
     "submitting": "Submitting...",
     "success_title": "You're at the playground!",
     "success_body": "Your group has been notified. Have fun!",
-    "done": "Done"
+    "done": "Done",
+    "leaving_confirm": "Leave {{name}}?",
+    "search_placeholder": "Search for a playground",
+    "add_new_with_name": "Add \"{{name}}\" as a new playground"
   },
   "children": {
     "siblings_collapsed": "+ {{count}} sibling(s)",
@@ -62,11 +76,26 @@
     "rename_title": "Rename group",
     "view_members": "View members",
     "leave_group": "Leave group",
+    "delete_group": "Delete group",
+    "confirm_delete_group": "Delete \"{{name}}\"? This cannot be undone.",
+    "delete_active_checkins_error_title": "Can't delete yet",
+    "delete_active_checkins_error": "Children are currently checked in to a playground. Wait for everyone to leave before deleting the group.",
+    "transfer_ownership_title": "Transfer ownership",
+    "transfer_ownership_prompt": "Select a new owner before you leave:",
+    "transfer_ownership_confirm": "Make {{name}} the new group owner and leave?",
+    "make_owner": "Select",
     "confirm_remove_guardian": "Remove {{name}} from this group?",
     "confirm_remove_child": "Remove {{name}} from this group?",
     "confirm_regenerate": "Regenerate invite link? The current link will stop working.",
+    "group_deleted_toast": "The group \"{{name}}\" no longer exists",
     "last_admin_error": "Cannot remove the last admin — assign another admin first",
-    "admin_badge": "Admin"
+    "admin_badge": "Admin",
+    "children_count_one": "1 child",
+    "children_count_other": "{{count}} children",
+    "stay_in_group": "Do you want to stay in the group?",
+    "stay_in_group_yes": "Yes, I'll stay",
+    "stay_in_group_no": "No, leave",
+    "already_member": "You're already a member of this group"
   },
   "auth": {
     "email": "Email",
@@ -83,7 +112,13 @@
     "reset_password_sent": "We sent you a password reset email",
     "new_password": "New password",
     "complete_profile": "Let's get started",
-    "email_in_use": "Email already registered. Forgot your password?"
+    "email_in_use": "Email already registered. Forgot your password?",
+    "allow_notifications": "Allow notifications",
+    "notifications_subtitle": "Know when friends are at the playground",
+    "notifications_denied_title": "Notifications disabled",
+    "notifications_denied_body": "To receive notifications, open app settings and allow notifications.",
+    "notifications_open_settings": "Open settings",
+    "skip": "Skip"
   },
   "profile": {
     "title": "My Profile",
@@ -99,7 +134,8 @@
     "sign_out": "Sign out",
     "delete_account": "Delete account",
     "delete_confirm": "Are you sure you want to delete your account? This cannot be undone.",
-    "deleting": "Deleting account..."
+    "deleting": "Deleting account...",
+    "setup_incomplete": "Complete your setup"
   },
   "join": {
     "title": "Join group",
@@ -117,13 +153,26 @@
     "duplicate_title": "Similar child found",
     "duplicate_message": "Is {{name}} ({{year}}) your child?",
     "merge_confirm": "Yes, that's my child",
-    "merge_decline": "No, add separately"
+    "merge_decline": "No, add separately",
+    "invited_by": "{{name}} is inviting you to join",
+    "add_child_first": "Add a child now",
+    "already_member": "You're already a member of this group"
   },
   "nav": {
     "home": "Home",
     "children": "Children",
     "groups": "Groups",
-    "profile": "Profile"
+    "profile": "Profile",
+    "back": "Back"
+  },
+  "onboarding": {
+    "children_title": "My children",
+    "children_subtitle": "Add your children so group members know who's at the playground",
+    "groups_title": "My group",
+    "groups_subtitle": "Join an existing group or create a new one with friends",
+    "skip": "Skip",
+    "continue": "Continue",
+    "done": "Done"
   },
   "common": {
     "cancel": "Cancel",

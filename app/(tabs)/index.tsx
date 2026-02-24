@@ -8,22 +8,90 @@ import {
   AppState,
   ActivityIndicator,
   Alert,
+  Linking,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import * as Notifications from 'expo-notifications';
 import { useAuth } from '../../contexts/AuthContext';
 import {
   getMyGroups,
   getGroupActiveCheckins,
+  getMyActiveCheckin,
+  getMyChildren,
   respondStillThere,
   leaveCheckin,
   type GroupRow,
   type HomeFeedItem,
   type HomeNamedChild,
+  type ActiveCheckinResult,
 } from '../../lib/db/rpc';
 
 const POLL_INTERVAL_MS = 30_000;
+
+// ---------------------------------------------------------------------------
+// Active session card — shown when user is currently checked in
+// ---------------------------------------------------------------------------
+function ActiveSessionCard({
+  active,
+  onSwitchPlayground,
+  onEndVisit,
+}: {
+  active: NonNullable<ActiveCheckinResult>;
+  onSwitchPlayground: () => void;
+  onEndVisit: () => void;
+}) {
+  const { t } = useTranslation();
+  const [elapsed, setElapsed] = useState('');
+
+  // Live duration counter
+  useEffect(() => {
+    function update() {
+      const ms  = Date.now() - new Date(active.checked_in_at).getTime();
+      const min = Math.floor(ms / 60000);
+      const hr  = Math.floor(min / 60);
+      setElapsed(hr > 0 ? `${hr}ש ${min % 60}ד` : `${min}ד`);
+    }
+    update();
+    const id = setInterval(update, 30_000);
+    return () => clearInterval(id);
+  }, [active.checked_in_at]);
+
+  return (
+    <View className="mx-4 mb-3 bg-green-50 border border-green-200 rounded-xl p-4">
+      <View className="flex-row justify-between items-center mb-1">
+        <Text className="text-base font-bold text-green-800">
+          🛝 {active.playground_name}
+        </Text>
+        <Text className="text-xs text-green-600">{elapsed}</Text>
+      </View>
+
+      <Text className="text-sm text-green-700 mb-3">
+        {active.child_names.join(', ')}
+      </Text>
+
+      <View className="flex-row gap-2">
+        <TouchableOpacity
+          className="flex-1 border border-green-600 rounded-lg py-2 items-center"
+          onPress={onSwitchPlayground}
+        >
+          <Text className="text-green-700 text-sm font-medium">
+            {t('home.switch_playground')}
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          className="flex-1 bg-red-500 rounded-lg py-2 items-center"
+          onPress={onEndVisit}
+        >
+          <Text className="text-white text-sm font-medium">
+            {t('home.end_visit')}
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+}
 
 // ---------------------------------------------------------------------------
 // SiblingGroup: one guardian's children at a playground
@@ -31,13 +99,15 @@ const POLL_INTERVAL_MS = 30_000;
 function SiblingGroup({
   checkins,
   isOwn,
+  playgroundName,
   onStillHere,
   onLeave,
 }: {
   checkins: HomeNamedChild[];
   isOwn: boolean;
+  playgroundName: string;
   onStillHere: (ids: string[]) => void;
-  onLeave: (ids: string[]) => void;
+  onLeave: (ids: string[], playgroundName: string) => void;
 }) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
@@ -49,7 +119,7 @@ function SiblingGroup({
       <View className="flex-row items-center justify-between">
         <View>
           <Text className="text-sm font-medium text-gray-800">
-            {first.first_name}
+            {first.first_name} {first.last_name}
             <Text className="text-gray-400 font-normal">
               {' · '}{t('children.years_old', { age: first.age_years })}
             </Text>
@@ -67,7 +137,7 @@ function SiblingGroup({
 
           {expanded && rest.map((c) => (
             <Text key={c.child_id} className="text-sm text-gray-600 mt-0.5 pl-2">
-              {c.first_name} · {t('children.years_old', { age: c.age_years })}
+              {c.first_name} {c.last_name} · {t('children.years_old', { age: c.age_years })}
             </Text>
           ))}
         </View>
@@ -82,7 +152,7 @@ function SiblingGroup({
             </TouchableOpacity>
             <TouchableOpacity
               className="border border-red-300 rounded-lg px-2 py-1"
-              onPress={() => onLeave(checkins.map((c) => c.check_in_id))}
+              onPress={() => onLeave(checkins.map((c) => c.check_in_id), playgroundName)}
             >
               <Text className="text-red-500 text-xs">{t('checkin.leaving')}</Text>
             </TouchableOpacity>
@@ -121,20 +191,33 @@ function PlaygroundCard({
 
   async function handleStillHere(checkInIds: string[]) {
     try {
-      await Promise.all(checkInIds.map((id) => respondStillThere(id)));
+      await Promise.allSettled(checkInIds.map((id) => respondStillThere(id)));
       onAction();
     } catch (e: any) {
       Alert.alert(t('errors.generic'), e.message);
     }
   }
 
-  async function handleLeave(checkInIds: string[]) {
-    try {
-      await Promise.all(checkInIds.map((id) => leaveCheckin(id)));
-      onAction();
-    } catch (e: any) {
-      Alert.alert(t('errors.generic'), e.message);
-    }
+  function handleLeave(checkInIds: string[], playgroundName: string) {
+    Alert.alert(
+      t('checkin.leaving_confirm', { name: playgroundName }),
+      '',
+      [
+        { text: t('home.confirm_end_visit_no'), style: 'cancel' },
+        {
+          text: t('home.confirm_end_visit_yes'),
+          style: 'destructive',
+          onPress: async () => {
+            const results = await Promise.allSettled(checkInIds.map((id) => leaveCheckin(id)));
+            const failed = results.filter((r) => r.status === 'rejected');
+            if (failed.length > 0) {
+              console.warn('[home] some leaveCheckin calls failed', failed);
+            }
+            onAction();
+          },
+        },
+      ]
+    );
   }
 
   return (
@@ -153,6 +236,7 @@ function PlaygroundCard({
           key={guardianId}
           checkins={checkins}
           isOwn={guardianId === currentUserId}
+          playgroundName={item.playground_name}
           onStillHere={handleStillHere}
           onLeave={handleLeave}
         />
@@ -176,30 +260,48 @@ export default function HomeScreen() {
   const { user } = useAuth();
   const router = useRouter();
 
-  const [groups, setGroups]             = useState<GroupRow[]>([]);
+  const [groups, setGroups]               = useState<GroupRow[]>([]);
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
-  const [feed, setFeed]                 = useState<HomeFeedItem[]>([]);
+  const [feed, setFeed]                   = useState<HomeFeedItem[]>([]);
+  const [activeCheckin, setActiveCheckin] = useState<ActiveCheckinResult>(null);
+  const [hasChildren, setHasChildren]     = useState(false);
   const [groupsLoading, setGroupsLoading] = useState(true);
-  const [feedLoading, setFeedLoading]   = useState(false);
+  const [feedLoading, setFeedLoading]     = useState(false);
+  const [notifDenied, setNotifDenied]     = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // ── Load groups on mount ──────────────────────────────────────────────────
+  // ── Load groups + active checkin + children on mount ─────────────────────
   useEffect(() => {
-    getMyGroups()
-      .then((data) => {
-        setGroups(data);
-        if (data.length > 0) setSelectedGroupId(data[0].id);
+    Promise.all([
+      getMyGroups(),
+      getMyActiveCheckin(),
+      getMyChildren(),
+    ])
+      .then(([groupsData, active, children]) => {
+        setGroups(groupsData);
+        setActiveCheckin(active);
+        setHasChildren(children.length > 0);
+        if (groupsData.length > 0) setSelectedGroupId(groupsData[0].id);
       })
       .catch(console.error)
       .finally(() => setGroupsLoading(false));
+
+    // Check notification permission
+    Notifications.getPermissionsAsync()
+      .then(({ status }) => setNotifDenied(status === 'denied'))
+      .catch(() => {});
   }, []);
 
-  // ── Poll feed (30s, AppState-aware) ───────────────────────────────────────
+  // ── Poll feed + active checkin (30s, AppState-aware) ─────────────────────
   const poll = useCallback(async () => {
     if (!selectedGroupId) return;
     try {
-      const data = await getGroupActiveCheckins(selectedGroupId);
+      const [data, active] = await Promise.all([
+        getGroupActiveCheckins(selectedGroupId),
+        getMyActiveCheckin(),
+      ]);
       setFeed(data);
+      setActiveCheckin(active);
     } catch (e) {
       console.error('[home] poll error', e);
     } finally {
@@ -237,31 +339,43 @@ export default function HomeScreen() {
     };
   }, [poll]);
 
+  // ── End visit ─────────────────────────────────────────────────────────────
+  function handleEndVisit() {
+    if (!activeCheckin) return;
+    Alert.alert(
+      t('home.confirm_end_visit', { name: activeCheckin.playground_name }),
+      '',
+      [
+        { text: t('home.confirm_end_visit_no'), style: 'cancel' },
+        {
+          text: t('home.confirm_end_visit_yes'),
+          style: 'destructive',
+          onPress: async () => {
+            await Promise.allSettled(activeCheckin.check_in_ids.map((id) => leaveCheckin(id)));
+            setActiveCheckin(null);
+            poll();
+          },
+        },
+      ]
+    );
+  }
+
+  // ── Switch playground (go to check-in step 2 with same children) ──────────
+  function handleSwitchPlayground() {
+    if (!activeCheckin) return;
+    const childParam = activeCheckin.child_ids.join(',');
+    router.push(`/checkin?step=playground&childIds=${childParam}`);
+  }
+
+  // ── Derived state ─────────────────────────────────────────────────────────
+  const hasGroups   = groups.length > 0;
+  const isOnboarded = hasGroups && hasChildren;
+
   // ── Render: loading ───────────────────────────────────────────────────────
   if (groupsLoading) {
     return (
       <SafeAreaView className="flex-1 bg-gray-50 items-center justify-center">
         <ActivityIndicator size="large" color="#16a34a" />
-      </SafeAreaView>
-    );
-  }
-
-  // ── Render: no groups ─────────────────────────────────────────────────────
-  if (groups.length === 0) {
-    return (
-      <SafeAreaView className="flex-1 bg-gray-50">
-        <View className="flex-row justify-between items-center px-4 py-4 bg-white border-b border-gray-200">
-          <Text className="text-xl font-bold text-gray-900">{t('home.title')}</Text>
-        </View>
-        <View className="flex-1 items-center justify-center px-6">
-          <Text className="text-gray-500 text-base text-center mb-6">{t('home.no_groups')}</Text>
-          <TouchableOpacity
-            className="bg-green-600 rounded-lg px-8 py-3"
-            onPress={() => router.push('/(tabs)/groups')}
-          >
-            <Text className="text-white font-semibold">{t('groups.create')}</Text>
-          </TouchableOpacity>
-        </View>
       </SafeAreaView>
     );
   }
@@ -275,10 +389,23 @@ export default function HomeScreen() {
         <View className="flex-row justify-between items-center">
           <Text className="text-xl font-bold text-gray-900">{t('home.title')}</Text>
           <TouchableOpacity
-            className="bg-green-600 rounded-lg px-4 py-2"
-            onPress={() => router.push('/checkin')}
+            className={`rounded-lg px-4 py-2 ${isOnboarded ? 'bg-green-600' : 'bg-gray-300'}`}
+            onPress={() => {
+              if (!isOnboarded) {
+                Alert.alert(
+                  t('home.setup_banner'),
+                  !hasChildren
+                    ? t('home.setup_add_children')
+                    : t('home.setup_join_group')
+                );
+                return;
+              }
+              router.push('/checkin');
+            }}
           >
-            <Text className="text-white font-semibold text-sm">{t('checkin.submit')}</Text>
+            <Text className={`font-semibold text-sm ${isOnboarded ? 'text-white' : 'text-gray-500'}`}>
+              {t('checkin.submit')}
+            </Text>
           </TouchableOpacity>
         </View>
 
@@ -313,36 +440,95 @@ export default function HomeScreen() {
         )}
       </View>
 
-      {/* Feed */}
-      {feedLoading ? (
-        <ActivityIndicator size="large" color="#16a34a" style={{ marginTop: 48 }} />
+      {/* Notification permission banner */}
+      {notifDenied && (
+        <TouchableOpacity
+          className="bg-amber-50 border-b border-amber-200 px-4 py-3 flex-row justify-between items-center"
+          onPress={() => Linking.openSettings()}
+        >
+          <Text className="text-amber-800 text-sm flex-1 mr-2">
+            {t('home.notification_denied_banner')}
+          </Text>
+          <Text className="text-amber-600 text-sm font-medium">
+            {t('home.notification_denied_settings')}
+          </Text>
+        </TouchableOpacity>
+      )}
+
+      {/* Setup banner — Path B */}
+      {!isOnboarded && (
+        <TouchableOpacity
+          className="bg-green-50 border-b border-green-200 px-4 py-3 flex-row justify-between items-center"
+          onPress={() => {
+            if (!hasChildren) router.push('/(tabs)/children');
+            else router.push('/(tabs)/groups');
+          }}
+        >
+          <Text className="text-green-800 text-sm font-medium">
+            {t('home.setup_banner')} — {!hasChildren
+              ? t('home.setup_add_children')
+              : t('home.setup_join_group')}
+          </Text>
+          <Text className="text-green-600 text-sm">→</Text>
+        </TouchableOpacity>
+      )}
+
+      {/* Active session card */}
+      {activeCheckin && (
+        <View className="pt-3">
+          <ActiveSessionCard
+            active={activeCheckin}
+            onSwitchPlayground={handleSwitchPlayground}
+            onEndVisit={handleEndVisit}
+          />
+        </View>
+      )}
+
+      {/* No groups empty state */}
+      {groups.length === 0 ? (
+        <View className="flex-1 items-center justify-center px-6">
+          <Text className="text-gray-500 text-base text-center mb-6">{t('home.no_groups')}</Text>
+          <TouchableOpacity
+            className="bg-green-600 rounded-lg px-8 py-3"
+            onPress={() => router.push('/(tabs)/groups')}
+          >
+            <Text className="text-white font-semibold">{t('groups.create')}</Text>
+          </TouchableOpacity>
+        </View>
       ) : (
-        <FlatList
-          data={feed}
-          keyExtractor={(item) => item.playground_id}
-          contentContainerStyle={{ paddingVertical: 12 }}
-          renderItem={({ item }) => (
-            <PlaygroundCard
-              item={item}
-              currentUserId={user?.id ?? ''}
-              onAction={poll}
-              onPress={() => router.push(`/playground/${item.playground_id}`)}
-            />
-          )}
-          ListEmptyComponent={
-            <View className="items-center justify-center mt-16 px-6">
-              <Text className="text-gray-500 text-base text-center">
-                {t('home.empty_state')}
-              </Text>
-              <TouchableOpacity
-                className="mt-6 bg-green-600 rounded-lg px-8 py-3"
-                onPress={() => router.push('/checkin')}
-              >
-                <Text className="text-white font-semibold">{t('checkin.submit')}</Text>
-              </TouchableOpacity>
-            </View>
-          }
-        />
+        /* Feed */
+        feedLoading ? (
+          <ActivityIndicator size="large" color="#16a34a" style={{ marginTop: 48 }} />
+        ) : (
+          <FlatList
+            data={feed}
+            keyExtractor={(item) => item.playground_id}
+            contentContainerStyle={{ paddingVertical: 12 }}
+            renderItem={({ item }) => (
+              <PlaygroundCard
+                item={item}
+                currentUserId={user?.id ?? ''}
+                onAction={poll}
+                onPress={() => router.push(`/playground/${item.playground_id}`)}
+              />
+            )}
+            ListEmptyComponent={
+              <View className="items-center justify-center mt-16 px-6">
+                <Text className="text-gray-500 text-base text-center">
+                  {t('home.empty_state')}
+                </Text>
+                {isOnboarded && (
+                  <TouchableOpacity
+                    className="mt-6 bg-green-600 rounded-lg px-8 py-3"
+                    onPress={() => router.push('/checkin')}
+                  >
+                    <Text className="text-white font-semibold">{t('checkin.submit')}</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            }
+          />
+        )
       )}
     </SafeAreaView>
   );

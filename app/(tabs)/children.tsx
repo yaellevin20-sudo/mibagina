@@ -180,6 +180,17 @@ function ChildCard({
         </Text>
       </View>
 
+      {/* Groups */}
+      {child.groups.length > 0 ? (
+        <Text className="text-xs text-gray-400 mt-1">
+          {child.groups.map((g) => g.name).join(', ')}
+        </Text>
+      ) : (
+        <Text className="text-xs text-gray-400 mt-1">
+          {t('profile.setup_incomplete')}
+        </Text>
+      )}
+
       {/* Co-guardians */}
       {child.co_guardians.length > 0 && (
         <View className="mt-3 pt-3 border-t border-gray-100">

@@ -12,7 +12,8 @@ import { AuthProvider, useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import i18n from '../lib/i18n';
 import { StillThereModal } from '../components/StillThereModal';
-import type { StillTherePayload, GroupCheckinPayload } from '../lib/notifications';
+import { respondStillThere, leaveCheckin } from '../lib/db/rpc';
+import type { StillTherePayload, GroupCheckinPayload, GroupDeletedPayload } from '../lib/notifications';
 
 // Enforce RTL/LTR on app init. A restart is required after toggling.
 const isHebrew = i18n.language === 'he';
@@ -63,13 +64,13 @@ function RootNavigator() {
       return;
     }
 
-    const inAuthGroup = segments[0] === '(auth)';
-    const inJoinRoute = segments[0] === 'join'; // join/[token].tsx handles its own auth redirect
+    const inAuthGroup  = segments[0] === '(auth)';
+    const inJoinRoute  = segments[0] === 'join'; // join/[token].tsx handles its own auth redirect
     const inResetRoute = segments[0] === 'reset-password';
 
     if (!session && !inAuthGroup && !inJoinRoute && !inResetRoute) {
-      // Not authenticated — send to login.
-      router.replace('/(auth)/login');
+      // Not authenticated — send to landing screen.
+      router.replace('/(auth)/landing');
     }
     // Auth screens handle their own post-login routing (guardians row check,
     // join token resumption). Do not redirect here to avoid races.
@@ -78,7 +79,7 @@ function RootNavigator() {
   // 1. Foreground: notification received while app is open
   useEffect(() => {
     const sub = Notifications.addNotificationReceivedListener((n) => {
-      const d = n.request.content.data as StillTherePayload | GroupCheckinPayload | undefined;
+      const d = n.request.content.data as StillTherePayload | GroupCheckinPayload | GroupDeletedPayload | undefined;
       if (!d) return;
       if (d.type === 'still_there_prompt') setPendingPrompt(d as StillTherePayload);
       if (d.type === 'group_checkin') {
@@ -92,36 +93,94 @@ function RootNavigator() {
           },
         });
       }
-    });
-    return () => sub.remove();
-  }, []);
-
-  // 2. Warm-start: user tapped notification, app was backgrounded
-  useEffect(() => {
-    const sub = Notifications.addNotificationResponseReceivedListener((r) => {
-      const d = r.notification.request.content.data as StillTherePayload | GroupCheckinPayload | undefined;
-      if (!d) return;
-      if (d.type === 'still_there_prompt') setPendingPrompt(d as StillTherePayload);
-      if (d.type === 'group_checkin') {
-        router.push(`/playground/${(d as GroupCheckinPayload).playground_id}`);
+      if (d.type === 'group_deleted') {
+        Toast.show({
+          text1: n.request.content.title ?? '',
+          text2: n.request.content.body ?? '',
+          onPress: () => {
+            Toast.hide();
+            router.push('/(tabs)/groups');
+          },
+        });
       }
     });
     return () => sub.remove();
   }, []);
 
-  // 3. Cold-start: user tapped notification, app was killed — wait for session.
-  // Guard with a ref so this only runs once — session can change (refresh, re-login)
-  // and re-processing a stale notification would show phantom modals.
+  // 2. Warm-start: user tapped notification (or quick-action button), app was backgrounded
+  useEffect(() => {
+    const sub = Notifications.addNotificationResponseReceivedListener((r) => {
+      const d = r.notification.request.content.data as StillTherePayload | GroupCheckinPayload | GroupDeletedPayload | undefined;
+      if (!d) return;
+
+      // Handle still_there quick-action buttons (no app-open required but may open app)
+      if (d.type === 'still_there_prompt') {
+        const actionId = r.actionIdentifier;
+        if (actionId === 'still_here') {
+          // Extend all check-ins silently
+          const payload = d as StillTherePayload;
+          Promise.allSettled(
+            payload.check_ins.map((ci) => respondStillThere(ci.check_in_id))
+          ).catch(console.warn);
+          return;
+        }
+        if (actionId === 'leaving') {
+          // Leave all check-ins silently
+          const payload = d as StillTherePayload;
+          Promise.allSettled(
+            payload.check_ins.map((ci) => leaveCheckin(ci.check_in_id))
+          ).catch(console.warn);
+          return;
+        }
+        // Default tap: open modal
+        setPendingPrompt(d as StillTherePayload);
+      }
+
+      if (d.type === 'group_checkin') {
+        router.push(`/playground/${(d as GroupCheckinPayload).playground_id}`);
+      }
+      if (d.type === 'group_deleted') {
+        router.push('/(tabs)/groups');
+      }
+    });
+    return () => sub.remove();
+  }, []);
+
+  // 3. Cold-start: user tapped notification (or quick-action), app was killed.
+  // Guard with a ref so this only runs once — session can change and re-processing
+  // a stale notification would show phantom modals.
   useEffect(() => {
     if (!session || coldStartHandled.current) return;
     coldStartHandled.current = true;
     Notifications.getLastNotificationResponseAsync().then((r) => {
       if (!r) return;
-      const d = r.notification.request.content.data as StillTherePayload | GroupCheckinPayload | undefined;
+      const d = r.notification.request.content.data as StillTherePayload | GroupCheckinPayload | GroupDeletedPayload | undefined;
       if (!d) return;
-      if (d.type === 'still_there_prompt') setPendingPrompt(d as StillTherePayload);
+
+      if (d.type === 'still_there_prompt') {
+        const actionId = r.actionIdentifier;
+        if (actionId === 'still_here') {
+          const payload = d as StillTherePayload;
+          Promise.allSettled(
+            payload.check_ins.map((ci) => respondStillThere(ci.check_in_id))
+          ).catch(console.warn);
+          return;
+        }
+        if (actionId === 'leaving') {
+          const payload = d as StillTherePayload;
+          Promise.allSettled(
+            payload.check_ins.map((ci) => leaveCheckin(ci.check_in_id))
+          ).catch(console.warn);
+          return;
+        }
+        setPendingPrompt(d as StillTherePayload);
+      }
+
       if (d.type === 'group_checkin') {
         router.push(`/playground/${(d as GroupCheckinPayload).playground_id}`);
+      }
+      if (d.type === 'group_deleted') {
+        router.push('/(tabs)/groups');
       }
     });
   }, [session]);

@@ -15,7 +15,8 @@ export type DuplicateInfo = {
 
 export type JoinResult =
   | { status: 'done' }
-  | { status: 'needs_confirmation'; duplicates: DuplicateInfo[] };
+  | { status: 'needs_confirmation'; duplicates: DuplicateInfo[] }
+  | { status: 'already_member'; group_id: string; group_name: string };
 
 // ---------------------------------------------------------------------------
 // validateInviteToken(token)
@@ -24,7 +25,7 @@ export type JoinResult =
 // ---------------------------------------------------------------------------
 export async function validateInviteToken(
   token: string
-): Promise<{ group_id: string; group_name: string }> {
+): Promise<{ group_id: string; group_name: string; inviter_name?: string | null }> {
   const { data, error } = await supabase.functions.invoke('join-group', {
     body: { action: 'validate', token },
   });
