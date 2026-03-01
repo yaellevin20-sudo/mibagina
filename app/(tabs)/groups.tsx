@@ -365,7 +365,7 @@ function CreateGroupModal({
         onRequestClose={() => setShowPicker(false)}
       >
         <Pressable
-          style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.4)', paddingBottom: insets.bottom }}
+          style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.4)' }}
           onPress={() => setShowPicker(false)}
         >
           <Pressable>
@@ -419,6 +419,8 @@ function CreateGroupModal({
                 </TouchableOpacity>
               </ScrollView>
             </View>
+            {/* White fill for nav bar area — prevents parent modal showing through */}
+            <View style={{ height: insets.bottom, backgroundColor: 'white' }} />
           </Pressable>
         </Pressable>
       </Modal>
