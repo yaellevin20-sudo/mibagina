@@ -302,7 +302,10 @@ export default function ChildrenScreen() {
     <SafeAreaView style={{ flex: 1, backgroundColor: '#f1fdf5' }}>
       {/* App bar */}
       <View className="bg-white px-6 py-3 flex-row justify-between items-center">
-        <Text className="text-2xl font-semibold text-black">{t('common.app_name')} 🌳</Text>
+        <View className="flex-row items-center" style={{ gap: 6 }}>
+          <Text className="text-2xl font-semibold text-black">{t('common.app_name')}</Text>
+          <Image source={require('../../assets/tree.png')} style={{ width: 26, height: 26 }} />
+        </View>
         <TouchableOpacity>
           <Ionicons name="menu" size={24} color="black" />
         </TouchableOpacity>
