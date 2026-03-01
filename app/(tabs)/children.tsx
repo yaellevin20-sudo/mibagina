@@ -308,10 +308,15 @@ export default function ChildrenScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Screen title */}
-      <Text className="text-3xl font-semibold text-black text-right px-6 pt-4 pb-2">
-        {t('onboarding.children_title')}
-      </Text>
+      {/* Screen title + add button */}
+      <View className="flex-row justify-between items-center px-6 pt-4 pb-2">
+        <TouchableOpacity onPress={() => setShowAddModal(true)}>
+          <Ionicons name="add-circle-outline" size={28} color="#16a34a" />
+        </TouchableOpacity>
+        <Text className="text-3xl font-semibold text-black">
+          {t('onboarding.children_title')}
+        </Text>
+      </View>
 
       {pendingJoinToken && (
         <TouchableOpacity

@@ -365,11 +365,11 @@ function CreateGroupModal({
         onRequestClose={() => setShowPicker(false)}
       >
         <Pressable
-          style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.4)' }}
+          style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.4)', paddingBottom: insets.bottom }}
           onPress={() => setShowPicker(false)}
         >
           <Pressable>
-            <View className="bg-white rounded-t-2xl" style={{ maxHeight: '60%', paddingBottom: insets.bottom }}>
+            <View className="bg-white rounded-t-2xl" style={{ maxHeight: '60%' }}>
               {/* Handle bar */}
               <View className="items-center pt-3 pb-2">
                 <View className="w-10 rounded-full bg-gray-300" style={{ height: 4 }} />
