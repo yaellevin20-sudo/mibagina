@@ -281,18 +281,19 @@ where id not in (select child_id from guardian_children);
 
 ---
 
-## Build Phases
+## Build Status
 
-At the start of each session say: "We're on Phase X. Only build what's in Phase X. Refer to CLAUDE.md for all spec details."
+All MVP phases complete. App is in post-MVP polish / production-prep.
 
-| Phase | Scope |
-|---|---|
-| 1 | Database migration SQL: enums, tables, indexes, views, RLS, all RPCs, all triggers |
-| 2 | Supabase client setup, TypeScript types, auth helpers, session management, i18n setup |
-| 3 | Auth screens: login.tsx, signup.tsx, name.tsx |
-| 4 | Children tab + Groups tab |
-| 5 | Join flow (join/[token].tsx) including duplicate merge |
-| 6 | Check-in flow + "Still There?" Edge Function |
-| 7 | Home screen + Playground view |
-| 8 | Profile screen + account deletion |
-| 9 | Edge Functions: rate limiting, orphan monitoring, scheduled cleanup |
+| Phase | Scope | Status |
+|---|---|---|
+| 1 | Database migration SQL: enums, tables, indexes, views, RLS, all RPCs, all triggers | ✅ |
+| 2 | Supabase client setup, TypeScript types, auth helpers, session management, i18n setup | ✅ |
+| 3 | Auth screens: login.tsx, signup.tsx, name.tsx | ✅ |
+| 4 | Children tab + Groups tab | ✅ |
+| 5 | Join flow (join/[token].tsx) including duplicate merge | ✅ |
+| 6 | Check-in flow + "Still There?" Edge Function | ✅ |
+| 7 | Home screen + Playground view | ✅ |
+| 8 | Profile screen + account deletion | ✅ |
+| 9 | Edge Functions: rate limiting, orphan monitoring, scheduled cleanup | ✅ |
+| + | Google OAuth, onboarding flow, push notifications, EAS build config, pretty invite URLs (mibagina.co.il) | ✅ |
