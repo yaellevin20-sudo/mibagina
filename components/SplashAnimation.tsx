@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { Animated, Easing, StyleSheet, Text, View } from 'react-native';
+import { Animated, Easing, Image, StyleSheet, Text, View } from 'react-native';
 
 // Approximate rendered width of "מי בגינה" at fontSize 30 fontWeight 800.
 // Adjust slightly if text clips on a physical device.
@@ -52,9 +52,10 @@ export function SplashAnimation({ onDone }: { onDone: () => void }) {
         <Animated.View style={[styles.textClip, { width: textWidth }]}>
           <Text style={styles.text} numberOfLines={1}>מי בגינה</Text>
         </Animated.View>
-        <Animated.Text style={[styles.tree, { transform: [{ scale: treeScale }] }]}>
-          🌳
-        </Animated.Text>
+        <Animated.Image
+          source={require('../assets/tree.png')}
+          style={[styles.tree, { transform: [{ scale: treeScale }] }]}
+        />
       </View>
     </Animated.View>
   );
@@ -93,7 +94,7 @@ const styles = StyleSheet.create({
     textAlign: 'right',
   },
   tree: {
-    fontSize: 32,
-    lineHeight: ROW_HEIGHT,
+    width: 44,
+    height: 44,
   },
 });
