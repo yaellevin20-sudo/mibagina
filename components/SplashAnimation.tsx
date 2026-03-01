@@ -68,7 +68,9 @@ const styles = StyleSheet.create({
     zIndex: 999,
   },
   row: {
-    flexDirection: 'row',
+    // row-reverse in RTL = left-to-right: [textClip LEFT][tree RIGHT]
+    // Text reveals from tree side (right) outward to the left. ✓
+    flexDirection: 'row-reverse',
     alignItems: 'center',
   },
   textClip: {
