@@ -21,6 +21,8 @@ import { useAuth } from '../../contexts/AuthContext';
 // Required for OAuth redirect completion on iOS
 WebBrowser.maybeCompleteAuthSession();
 
+const BRAND_GREEN = '#3D7A50';
+
 export default function LoginScreen() {
   const { t } = useTranslation();
   const router = useRouter();
@@ -118,34 +120,40 @@ export default function LoginScreen() {
   return (
     <SafeAreaView className="flex-1 bg-white">
       <KeyboardAvoidingView
-        className="flex-1 px-6 justify-center"
+        className="flex-1 px-6"
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        <Text className="text-3xl font-bold text-center mb-8">mi bagina</Text>
+        {/* Header */}
+        <View className="pt-6 pb-8">
+          <Text className="text-3xl font-rubik-bold text-brand-green-dark">{t('auth.login')}</Text>
+        </View>
 
         {error && (
-          <Text className="text-red-500 text-sm mb-4 text-center">{error}</Text>
+          <Text className="text-red-500 text-sm mb-4 text-center font-rubik">{error}</Text>
         )}
 
         {/* Google sign-in */}
         <TouchableOpacity
-          className="border border-gray-300 rounded-lg py-3 items-center mb-4 flex-row justify-center"
+          className="rounded-xl py-3 items-center mb-4 flex-row justify-center border"
+          style={{ borderColor: BRAND_GREEN }}
           onPress={handleGoogleSignIn}
           disabled={loading}
         >
-          <Text className="text-gray-700 font-semibold text-base">{t('auth.continue_with_google')}</Text>
+          <Text className="font-rubik-semi text-base" style={{ color: BRAND_GREEN }}>
+            {t('auth.continue_with_google')}
+          </Text>
         </TouchableOpacity>
 
         {/* Divider */}
         <View className="flex-row items-center mb-4">
           <View className="flex-1 h-px bg-gray-200" />
-          <Text className="mx-3 text-gray-400 text-sm">—  {t('common.or')}  —</Text>
+          <Text className="mx-3 text-gray-400 text-sm font-rubik">{t('common.or')}</Text>
           <View className="flex-1 h-px bg-gray-200" />
         </View>
 
-        <Text className="text-sm font-medium text-gray-700 mb-1">{t('auth.email')}</Text>
+        <Text className="text-sm font-rubik-semi text-gray-700 mb-1">{t('auth.email')}</Text>
         <TextInput
-          className="border border-gray-300 rounded-lg px-4 py-3 mb-4 text-base"
+          className="border border-gray-300 rounded-xl px-4 py-3 mb-4 text-base font-rubik"
           value={email}
           onChangeText={setEmail}
           autoCapitalize="none"
@@ -154,9 +162,9 @@ export default function LoginScreen() {
           editable={!loading}
         />
 
-        <Text className="text-sm font-medium text-gray-700 mb-1">{t('auth.password')}</Text>
+        <Text className="text-sm font-rubik-semi text-gray-700 mb-1">{t('auth.password')}</Text>
         <TextInput
-          className="border border-gray-300 rounded-lg px-4 py-3 text-base"
+          className="border border-gray-300 rounded-xl px-4 py-3 text-base font-rubik"
           value={password}
           onChangeText={setPassword}
           secureTextEntry
@@ -166,23 +174,27 @@ export default function LoginScreen() {
 
         {/* Forgot password link */}
         <TouchableOpacity
-          className="items-end mb-6 mt-1"
+          className="items-end mb-6 mt-2"
           onPress={() => setShowForgotForm((v) => !v)}
           disabled={loading}
         >
-          <Text className="text-green-600 text-sm">{t('auth.forgot_password')}</Text>
+          <Text className="font-rubik text-sm" style={{ color: BRAND_GREEN }}>
+            {t('auth.forgot_password')}
+          </Text>
         </TouchableOpacity>
 
         {/* Inline forgot password form */}
         {showForgotForm && (
-          <View className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+          <View className="mb-4 p-4 bg-gray-50 rounded-xl border border-gray-200">
             {forgotSent ? (
-              <Text className="text-green-700 text-sm text-center">{t('auth.reset_password_sent')}</Text>
+              <Text className="font-rubik text-sm text-center" style={{ color: BRAND_GREEN }}>
+                {t('auth.reset_password_sent')}
+              </Text>
             ) : (
               <>
-                <Text className="text-sm font-medium text-gray-700 mb-2">{t('auth.email')}</Text>
+                <Text className="text-sm font-rubik-semi text-gray-700 mb-2">{t('auth.email')}</Text>
                 <TextInput
-                  className="border border-gray-300 rounded-lg px-4 py-3 mb-3 text-base bg-white"
+                  className="border border-gray-300 rounded-xl px-4 py-3 mb-3 text-base bg-white font-rubik"
                   value={forgotEmail}
                   onChangeText={setForgotEmail}
                   autoCapitalize="none"
@@ -191,14 +203,17 @@ export default function LoginScreen() {
                   editable={!forgotSending}
                 />
                 <TouchableOpacity
-                  className="bg-green-600 rounded-lg py-3 items-center"
+                  className="rounded-xl py-3 items-center"
+                  style={{ backgroundColor: BRAND_GREEN }}
                   onPress={handleForgotPassword}
                   disabled={forgotSending || !forgotEmail.trim()}
                 >
                   {forgotSending ? (
                     <ActivityIndicator color="white" />
                   ) : (
-                    <Text className="text-white font-semibold text-sm">{t('auth.reset_password_title')}</Text>
+                    <Text className="text-white font-rubik-semi text-sm">
+                      {t('auth.reset_password_title')}
+                    </Text>
                   )}
                 </TouchableOpacity>
               </>
@@ -207,20 +222,23 @@ export default function LoginScreen() {
         )}
 
         <TouchableOpacity
-          className="bg-green-600 rounded-lg py-4 items-center mb-4"
+          className="rounded-xl py-4 items-center mb-4"
+          style={{ backgroundColor: BRAND_GREEN }}
           onPress={handleLogin}
           disabled={loading}
         >
           {loading ? (
             <ActivityIndicator color="white" />
           ) : (
-            <Text className="text-white font-semibold text-base">{t('auth.login')}</Text>
+            <Text className="text-white font-rubik-bold text-base">{t('auth.login')}</Text>
           )}
         </TouchableOpacity>
 
         <Link href="/(auth)/signup" asChild>
           <TouchableOpacity className="items-center" disabled={loading}>
-            <Text className="text-green-600 text-sm">{t('auth.signup')}</Text>
+            <Text className="font-rubik text-sm" style={{ color: BRAND_GREEN }}>
+              {t('auth.signup')}
+            </Text>
           </TouchableOpacity>
         </Link>
       </KeyboardAvoidingView>

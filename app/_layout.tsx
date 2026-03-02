@@ -3,6 +3,7 @@ import '../lib/i18n';
 
 import { useEffect, useRef, useState } from 'react';
 import { I18nManager } from 'react-native';
+import { useFonts, Rubik_400Regular, Rubik_500Medium, Rubik_600SemiBold, Rubik_700Bold } from '@expo-google-fonts/rubik';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import * as Linking from 'expo-linking';
@@ -202,6 +203,15 @@ function RootNavigator() {
 }
 
 export default function RootLayout() {
+  const [fontsLoaded] = useFonts({
+    Rubik_400Regular,
+    Rubik_500Medium,
+    Rubik_600SemiBold,
+    Rubik_700Bold,
+  });
+
+  if (!fontsLoaded) return <SplashAnimation onDone={() => {}} />;
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <AuthProvider>

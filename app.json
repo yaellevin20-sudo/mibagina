@@ -16,8 +16,14 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.mibagina.app",
-      "infoPlist": { "UIBackgroundModes": ["remote-notification"] },
-      "associatedDomains": ["applinks:mibagina.co.il"]
+      "infoPlist": {
+        "UIBackgroundModes": [
+          "remote-notification"
+        ]
+      },
+      "associatedDomains": [
+        "applinks:mibagina.co.il"
+      ]
     },
     "android": {
       "adaptiveIcon": {
@@ -29,8 +35,15 @@
       "intentFilters": [
         {
           "action": "VIEW",
-          "data": [{ "scheme": "mibagina" }],
-          "category": ["BROWSABLE", "DEFAULT"]
+          "data": [
+            {
+              "scheme": "mibagina"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         },
         {
           "action": "VIEW",
@@ -42,7 +55,10 @@
               "pathPrefix": "/join"
             }
           ],
-          "category": ["BROWSABLE", "DEFAULT"]
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         }
       ],
       "package": "com.mibagina.app"
@@ -55,7 +71,15 @@
       "expo-router",
       "expo-secure-store",
       "expo-web-browser",
-      ["expo-notifications", { "icon": "./assets/icon.png", "color": "#16a34a", "defaultChannel": "still-there" }]
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#16a34a",
+          "defaultChannel": "still-there"
+        }
+      ],
+      "expo-font"
     ],
     "extra": {
       "router": {

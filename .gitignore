@@ -28,6 +28,11 @@ yarn-error.*
 
 # macOS
 .DS_Store
+
+# Claude Code
+.claude/
+.agents/
+skills-lock.json
 *.pem
 
 # local env files

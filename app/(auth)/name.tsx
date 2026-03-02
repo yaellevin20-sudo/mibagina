@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import {
+  View,
   Text,
   TextInput,
   TouchableOpacity,
@@ -12,7 +13,9 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '../../lib/supabase';
 import { createGuardian, touchLastActive } from '../../lib/db/rpc';
-import { getJoinToken } from '../../lib/auth';
+import OnboardingProgress from '../../components/OnboardingProgress';
+
+const BRAND_GREEN = '#3D7A50';
 
 export default function NameScreen() {
   const { t } = useTranslation();
@@ -54,15 +57,8 @@ export default function NameScreen() {
         console.warn('[name] touch_last_active failed', e);
       }
 
-      // Resume pending join flow if the user arrived via deep link.
-      const pendingToken = await getJoinToken();
-      if (pendingToken) {
-        router.replace(`/join/${pendingToken}`);
-        return;
-      }
-
-      // New users go through the notifications permission screen before home.
-      router.replace('/(auth)/notifications-ask');
+      // Proceed to onboarding: children step (2/4)
+      router.replace('/(auth)/children');
     } catch (e: any) {
       setError(e.message ?? t('errors.generic'));
     } finally {
@@ -73,24 +69,39 @@ export default function NameScreen() {
   return (
     <SafeAreaView className="flex-1 bg-white">
       <KeyboardAvoidingView
-        className="flex-1 px-6 justify-center"
+        className="flex-1 px-6"
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        <Text className="text-3xl font-bold text-center mb-2">mi bagina</Text>
-        <Text className="text-base text-gray-600 text-center mb-2">
-          {t('auth.complete_profile')}
+        {/* Back button */}
+        <TouchableOpacity className="pt-4 pb-2" onPress={() => router.back()}>
+          <Text className="font-rubik text-sm text-gray-500">{t('nav.back')}</Text>
+        </TouchableOpacity>
+
+        {/* Progress bar */}
+        <View className="pt-4">
+          <OnboardingProgress steps={4} current={1} />
+        </View>
+
+        {/* Title */}
+        <Text className="text-2xl font-rubik-bold text-brand-green-dark mb-1">
+          {t('onboarding.name_title')}
+        </Text>
+        <Text className="font-rubik text-gray-500 mb-2">
+          {t('onboarding.name_subtitle')}
         </Text>
 
         {email ? (
-          <Text className="text-sm text-gray-400 text-center mb-8">{email}</Text>
-        ) : null}
+          <Text className="text-sm font-rubik text-gray-400 mb-6">{email}</Text>
+        ) : (
+          <View className="mb-6" />
+        )}
 
         {error && (
-          <Text className="text-red-500 text-sm mb-4 text-center">{error}</Text>
+          <Text className="text-red-500 text-sm mb-4 font-rubik">{error}</Text>
         )}
 
         <TextInput
-          className="border border-gray-300 rounded-lg px-4 py-3 mb-6 text-base"
+          className="border border-gray-300 rounded-xl px-4 py-3 mb-6 text-base font-rubik"
           value={name}
           onChangeText={setName}
           placeholder={t('auth.display_name_placeholder')}
@@ -101,14 +112,15 @@ export default function NameScreen() {
         />
 
         <TouchableOpacity
-          className="bg-green-600 rounded-lg py-4 items-center"
+          className="rounded-xl py-4 items-center"
+          style={{ backgroundColor: name.trim() ? BRAND_GREEN : '#D1D5DB' }}
           onPress={handleContinue}
           disabled={loading || !name.trim()}
         >
           {loading ? (
             <ActivityIndicator color="white" />
           ) : (
-            <Text className="text-white font-semibold text-base">{t('auth.login')}</Text>
+            <Text className="text-white font-rubik-bold text-base">{t('onboarding.continue')}</Text>
           )}
         </TouchableOpacity>
       </KeyboardAvoidingView>
