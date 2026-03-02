@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>מי בגינה — Home Empty State</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Rubik', sans-serif;
+      background: #b5b5b5;
+      background-image:
+        radial-gradient(ellipse at 25% 10%, #cfe8d8 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 85%, #c5dece 0%, transparent 55%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 28px 16px 48px;
+      gap: 22px;
+    }
+
+    /* ── Phone shell ── */
+    .phone-shell {
+      width: 375px; height: 812px;
+      background: #0f0f0f;
+      border-radius: 54px; padding: 12px;
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,0.12),
+        0 40px 100px rgba(0,0,0,0.5),
+        inset 0 1px 0 rgba(255,255,255,0.06);
+      position: relative; flex-shrink: 0;
+    }
+    .phone-shell::before {
+      content: ''; position: absolute;
+      top: 12px; left: 50%; transform: translateX(-50%);
+      width: 128px; height: 34px;
+      background: #0f0f0f; border-radius: 0 0 24px 24px; z-index: 20;
+    }
+    .phone-screen {
+      width: 100%; height: 100%;
+      border-radius: 44px; overflow: hidden;
+      background: white; position: relative;
+    }
+
+    /* ── Status bar ── */
+    .status-bar {
+      position: absolute; top: 0; left: 0; right: 0;
+      height: 44px; display: flex; align-items: flex-end;
+      justify-content: space-between; padding: 0 26px 9px;
+      z-index: 100; direction: ltr;
+    }
+    .s-time { font-size: 15px; font-weight: 600; color: #1a1a1a; letter-spacing: -0.3px; }
+    .s-icons { display: flex; align-items: center; gap: 6px; }
+
+    /* ── Screen ── */
+    .screen {
+      position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      overflow-y: auto; overflow-x: hidden; scrollbar-width: none;
+      background: linear-gradient(180deg, #ffffff 0%, #F1FDF5 100%);
+    }
+    .screen::-webkit-scrollbar { display: none; }
+    .inner { display: flex; flex-direction: column; }
+
+    /* ── App header ── */
+    /* RTL: title RIGHT (first), hamburger LEFT (last) */
+    .app-header {
+      height: 56px; margin-top: 44px;
+      background: white;
+      display: flex; align-items: center; padding: 0 20px;
+      border-bottom: 1px solid #f3f4f6;
+    }
+    .hdr-title {
+      font-size: 22px; font-weight: 700; color: #1a1a1a;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .hdr-gap { flex: 1; }
+    .hdr-menu {
+      display: flex; flex-direction: column; gap: 5px;
+      cursor: pointer; padding: 4px;
+    }
+    .hdr-menu span {
+      display: block; width: 22px; height: 2px;
+      background: #1a1a1a; border-radius: 2px;
+    }
+
+    /* ── Greeting ── */
+    .greeting {
+      padding: 28px 20px 6px;
+    }
+    /* RTL: greeting text aligns right naturally */
+    .greeting-name {
+      font-size: 30px; font-weight: 600; color: #1a1a1a;
+      margin-bottom: 4px;
+    }
+    .greeting-sub {
+      font-size: 18px; font-weight: 400; color: #4a4a4a;
+    }
+
+    /* ── Empty state body ── */
+    .empty-body {
+      display: flex; flex-direction: column;
+      align-items: center;
+      padding: 28px 28px 0;
+      text-align: center;
+    }
+
+    .empty-quote {
+      font-size: 20px; font-weight: 500; color: #1a1a1a;
+      line-height: 1.45; margin-bottom: 24px;
+      /* slight indent effect matching Figma */
+    }
+
+    .fence-img {
+      width: 205px; height: 205px;
+      object-fit: contain;
+      margin-bottom: 24px;
+    }
+
+    .empty-desc {
+      font-size: 16px; font-weight: 400; color: #4a4a4a;
+      line-height: 1.5; margin-bottom: 0;
+    }
+
+    /* ── Bottom buttons ── */
+    /* RTL flex: "הוספת ילד" first = physical RIGHT (primary)
+                  "הוספת קבוצה" last = physical LEFT (secondary) */
+    .bottom-actions {
+      display: flex; gap: 12px;
+      padding: 20px 20px 40px;
+    }
+
+    /* "הוספת ילד" — solid brand green (primary) */
+    .btn-primary {
+      flex: 1; background: #3D7A50; color: white;
+      border: none; border-radius: 12px;
+      padding: 14px 10px; font-family: 'Rubik', sans-serif;
+      font-size: 15px; font-weight: 600;
+      cursor: pointer; text-align: center;
+      transition: background 0.15s;
+      min-height: 48px;
+    }
+    .btn-primary:hover { background: #2D6040; }
+
+    /* "הוספת קבוצה" — white outline (secondary) */
+    .btn-secondary {
+      flex: 1; background: white; color: #3D7A50;
+      border: 1.5px solid #3D7A50; border-radius: 12px;
+      padding: 14px 10px; font-family: 'Rubik', sans-serif;
+      font-size: 15px; font-weight: 600;
+      cursor: pointer; text-align: center;
+      transition: all 0.15s;
+      min-height: 48px;
+    }
+    .btn-secondary:hover { background: #E4F2EA; }
+
+    .footer { font-size: 12px; color: #666; direction: ltr; letter-spacing: 0.04em; }
+  </style>
+</head>
+<body>
+
+  <div class="phone-shell">
+    <div class="phone-screen">
+
+      <!-- Status bar (always LTR) -->
+      <div class="status-bar">
+        <span class="s-time">9:41</span>
+        <div class="s-icons">
+          <svg width="18" height="13" viewBox="0 0 18 13" fill="none">
+            <rect x="0"  y="7"  width="3" height="6"  rx="1" fill="#1a1a1a"/>
+            <rect x="5"  y="4"  width="3" height="9"  rx="1" fill="#1a1a1a"/>
+            <rect x="10" y="1"  width="3" height="12" rx="1" fill="#1a1a1a"/>
+            <rect x="15" y="0"  width="3" height="13" rx="1" fill="#1a1a1a" opacity="0.25"/>
+          </svg>
+          <svg width="16" height="12" viewBox="0 0 16 12" fill="none">
+            <circle cx="8" cy="10.5" r="1.5" fill="#1a1a1a"/>
+            <path d="M4.9 7.8a4.4 4.4 0 0 1 6.2 0" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+            <path d="M2.2 5.1a8 8 0 0 1 11.6 0" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+          </svg>
+          <svg width="26" height="13" viewBox="0 0 26 13" fill="none">
+            <rect x="0.5" y="0.5" width="21" height="12" rx="3.5" stroke="#1a1a1a" stroke-opacity="0.35"/>
+            <rect x="2" y="2" width="16" height="9" rx="2" fill="#1a1a1a"/>
+            <path d="M23 4.5v4c.9-.4 1.5-1.2 1.5-2s-.6-1.6-1.5-2z" fill="#1a1a1a" opacity="0.4"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="screen">
+        <div class="inner">
+
+          <!-- App header: RTL → title RIGHT (first), menu LEFT (last) -->
+          <div class="app-header">
+            <div class="hdr-title">מי בגינה <span>🌳</span></div>
+            <div class="hdr-gap"></div>
+            <div class="hdr-menu"><span></span><span></span><span></span></div>
+          </div>
+
+          <!-- Greeting (right-aligned naturally in RTL) -->
+          <div class="greeting">
+            <div class="greeting-name">שלום, יעל 👋</div>
+            <div class="greeting-sub">מי בגינה היום?</div>
+          </div>
+
+          <!-- Empty state content (centered) -->
+          <div class="empty-body">
+            <div class="empty-quote">
+              ״זה לא כל כך נעים לראות גן סגור...״
+            </div>
+
+            <!-- Fence illustration -->
+            <img
+              class="fence-img"
+              src="https://www.figma.com/api/mcp/asset/88d87b38-0538-482f-8a87-1dbd32540628"
+              alt="גדר"
+              onerror="this.src=''; this.alt='🏚️'; this.style.fontSize='80px'; this.style.lineHeight='205px'">
+
+            <div class="empty-desc">
+              כדי לראות מי בגינה, צריך להוסיף ילדים ולהצטרף לקבוצה
+            </div>
+          </div>
+
+          <!-- Bottom actions: RTL → "הוספת ילד" RIGHT (first), "הוספת קבוצה" LEFT (last) -->
+          <div class="bottom-actions">
+            <button class="btn-primary">הוספת ילד</button>
+            <button class="btn-secondary">הוספת קבוצה</button>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="footer">מי בגינה · Home Setup Empty State · 375px RTL</div>
+
+</body>
+</html>
