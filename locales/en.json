@@ -22,7 +22,12 @@
     "notif_banner_title": "Get to the park just in time",
     "notif_banner_body": "So you don't arrive at an empty park, we'll send you an update when children arrive",
     "notif_banner_cta": "Enable notifications",
-    "notif_banner_dismiss": "Not now"
+    "notif_banner_dismiss": "Not now",
+    "empty_greeting": "Hi, {{name}} 👋",
+    "empty_sub": "Who's at the playground today?",
+    "empty_no_kids_title": "No kids at the playground right now",
+    "empty_no_kids_sub": "Someone needs to be first 😉",
+    "empty_cta": "Add a park visit"
   },
   "playground": {
     "title": "Who's here?",

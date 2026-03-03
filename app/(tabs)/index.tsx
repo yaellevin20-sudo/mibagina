@@ -22,6 +22,7 @@ import {
   getGroupActiveCheckins,
   getMyActiveCheckin,
   getMyChildren,
+  getMyProfile,
   respondStillThere,
   leaveCheckin,
   type GroupRow,
@@ -29,6 +30,14 @@ import {
   type HomeNamedChild,
   type ActiveCheckinResult,
 } from '../../lib/db/rpc';
+
+const BTN_SHADOW = {
+  shadowColor: '#3D7A50',
+  shadowOffset: { width: 0, height: 3 },
+  shadowOpacity: 0.28,
+  shadowRadius: 7,
+  elevation: 6,
+};
 
 const POLL_INTERVAL_MS = 30_000;
 
@@ -271,6 +280,7 @@ export default function HomeScreen() {
   const [feedLoading, setFeedLoading]     = useState(false);
   const [notifStatus, setNotifStatus]     = useState<string | null>(null);
   const [notifBannerDismissed, setNotifBannerDismissed] = useState(false);
+  const [profileName, setProfileName]     = useState('');
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // ── Load groups + active checkin + children on mount ─────────────────────
@@ -280,11 +290,13 @@ export default function HomeScreen() {
       getMyGroups(),
       getMyActiveCheckin(),
       getMyChildren(),
+      getMyProfile(),
     ])
-      .then(([groupsData, active, children]) => {
+      .then(([groupsData, active, children, profile]) => {
         setGroups(groupsData);
         setActiveCheckin(active);
         setHasChildren(children.length > 0);
+        setProfileName(profile?.name?.split(' ')[0] ?? '');
         if (groupsData.length > 0) setSelectedGroupId(groupsData[0].id);
       })
       .catch(console.error)
@@ -558,40 +570,64 @@ export default function HomeScreen() {
             <Text className="text-white font-semibold">{t('groups.create')}</Text>
           </TouchableOpacity>
         </View>
-      ) : (
-        /* Feed */
-        feedLoading ? (
-          <ActivityIndicator size="large" color="#16a34a" style={{ marginTop: 48 }} />
-        ) : (
-          <FlatList
-            data={feed}
-            keyExtractor={(item) => item.playground_id}
-            contentContainerStyle={{ paddingVertical: 12 }}
-            renderItem={({ item }) => (
-              <PlaygroundCard
-                item={item}
-                currentUserId={user?.id ?? ''}
-                onAction={poll}
-                onPress={() => router.push(`/playground/${item.playground_id}`)}
-              />
-            )}
-            ListEmptyComponent={
-              <View className="items-center justify-center mt-16 px-6">
-                <Text className="text-gray-500 text-base text-center">
-                  {t('home.empty_state')}
+      ) : feedLoading ? (
+        <ActivityIndicator size="large" color="#16a34a" style={{ marginTop: 48 }} />
+      ) : feed.length === 0 ? (
+        /* Full-screen empty state */
+        <View style={{ flex: 1 }}>
+          {/* Greeting */}
+          <View className="px-6 pt-5 items-end">
+            {profileName ? (
+              <Text className="text-2xl font-rubik-bold text-gray-900">
+                {t('home.empty_greeting', { name: profileName })}
+              </Text>
+            ) : null}
+            <Text className="font-rubik text-sm text-gray-400 mt-0.5">
+              {t('home.empty_sub')}
+            </Text>
+          </View>
+
+          {/* Illustration + title + CTA */}
+          <View className="flex-1 items-center justify-center px-6" style={{ marginTop: -32 }}>
+            <Image
+              source={require('../../assets/playground.png')}
+              style={{ width: 220, height: 220, marginBottom: 20 }}
+              resizeMode="contain"
+            />
+            <Text className="text-xl font-rubik-bold text-gray-900 text-center mb-2">
+              {t('home.empty_no_kids_title')}
+            </Text>
+            <Text className="font-rubik text-gray-500 text-center mb-8" style={{ fontSize: 14 }}>
+              {t('home.empty_no_kids_sub')}
+            </Text>
+            {isOnboarded && (
+              <TouchableOpacity
+                className="w-full rounded-xl py-4 items-center"
+                style={{ backgroundColor: '#3D7A50', ...BTN_SHADOW }}
+                onPress={() => router.push('/checkin')}
+              >
+                <Text className="text-white font-rubik-bold text-base">
+                  {t('home.empty_cta')}
                 </Text>
-                {isOnboarded && (
-                  <TouchableOpacity
-                    className="mt-6 bg-green-600 rounded-lg px-8 py-3"
-                    onPress={() => router.push('/checkin')}
-                  >
-                    <Text className="text-white font-semibold">{t('checkin.submit')}</Text>
-                  </TouchableOpacity>
-                )}
-              </View>
-            }
-          />
-        )
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
+      ) : (
+        /* Feed with content */
+        <FlatList
+          data={feed}
+          keyExtractor={(item) => item.playground_id}
+          contentContainerStyle={{ paddingVertical: 12 }}
+          renderItem={({ item }) => (
+            <PlaygroundCard
+              item={item}
+              currentUserId={user?.id ?? ''}
+              onAction={poll}
+              onPress={() => router.push(`/playground/${item.playground_id}`)}
+            />
+          )}
+        />
       )}
     </SafeAreaView>
   );

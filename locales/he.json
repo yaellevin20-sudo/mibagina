@@ -22,7 +22,12 @@
     "notif_banner_title": "צאו לגינה בדיוק בזמן",
     "notif_banner_body": "כדי שלא תגיעו לגינה ריקה, נשלח לכם עדכון כשמגיעים ילדים",
     "notif_banner_cta": "הפעילו התראות",
-    "notif_banner_dismiss": "לא עכשיו"
+    "notif_banner_dismiss": "לא עכשיו",
+    "empty_greeting": "שלום, {{name}} 👋",
+    "empty_sub": "מי בגינה היום?",
+    "empty_no_kids_title": "אין ילדים בגינה כרגע",
+    "empty_no_kids_sub": "מישהו צריך להיות הראשון 😉",
+    "empty_cta": "הוסיפו ביקור בגינה"
   },
   "playground": {
     "title": "מי בגינה?",
