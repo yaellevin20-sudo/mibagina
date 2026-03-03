@@ -72,6 +72,7 @@
     "date_of_birth_hint": "YYYY-MM-DD",
     "confirm_remove": "להסיר את {{name}}?",
     "years_old": "בן/בת {{age}}",
+    "no_groups_hint": "הצטרפו לקבוצה כדי לראות חברים בגינה",
     "back_to_join": "סיימת להוסיף ילדים? לחץ להמשך ההצטרפות לקבוצה →"
   },
   "groups": {

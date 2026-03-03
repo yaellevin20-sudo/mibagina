@@ -72,6 +72,7 @@
     "date_of_birth_hint": "YYYY-MM-DD",
     "confirm_remove": "Remove {{name}}?",
     "years_old": "Age {{age}}",
+    "no_groups_hint": "Join a group to see friends at the playground",
     "back_to_join": "Done adding children? Tap to continue joining the group →"
   },
   "groups": {
