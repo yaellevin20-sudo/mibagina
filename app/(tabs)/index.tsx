@@ -11,7 +11,7 @@ import {
   Alert,
   Linking,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -282,6 +282,8 @@ export default function HomeScreen() {
   const [notifStatus, setNotifStatus]     = useState<string | null>(null);
   const [notifBannerDismissed, setNotifBannerDismissed] = useState(false);
   const [profileName, setProfileName]     = useState('');
+  const [menuOpen, setMenuOpen]           = useState(false);
+  const insets = useSafeAreaInsets();
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // ── Load groups + active checkin + children on mount ─────────────────────
@@ -437,7 +439,10 @@ export default function HomeScreen() {
           <Image source={require('../../assets/tree.png')} style={{ width: 26, height: 26 }} />
           <Text className="text-2xl font-rubik-semi text-black">{t('common.app_name')}</Text>
         </View>
-        <TouchableOpacity hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+        <TouchableOpacity
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          onPress={() => setMenuOpen((v) => !v)}
+        >
           <Ionicons name="menu" size={24} color="black" />
         </TouchableOpacity>
       </View>
@@ -617,6 +622,59 @@ export default function HomeScreen() {
             />
           )}
         />
+      )}
+      {/* Hamburger dropdown menu */}
+      {menuOpen && (
+        <>
+          {/* Backdrop */}
+          <TouchableOpacity
+            style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 50 }}
+            onPress={() => setMenuOpen(false)}
+            activeOpacity={1}
+          />
+
+          {/* Dropdown card */}
+          <View style={{
+            position: 'absolute',
+            top: insets.top + 56,
+            left: 12,
+            zIndex: 51,
+            backgroundColor: 'white',
+            borderRadius: 10,
+            width: 160,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.15,
+            shadowRadius: 8,
+            elevation: 8,
+            overflow: 'hidden',
+          }}>
+            {([
+              { labelKey: 'menu.my_children', icon: require('../../assets/Heart.png'),  route: '/(tabs)/children' },
+              { labelKey: 'menu.my_groups',   icon: require('../../assets/groups.png'), route: '/(tabs)/groups'   },
+              { labelKey: 'menu.my_profile',  icon: require('../../assets/person.png'), route: '/(tabs)/profile'  },
+            ] as const).map(({ labelKey, icon, route }, idx) => (
+              <TouchableOpacity
+                key={labelKey}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  paddingHorizontal: 14,
+                  height: 48,
+                  borderTopWidth: idx > 0 ? 1 : 0,
+                  borderTopColor: '#f3f4f6',
+                }}
+                onPress={() => { setMenuOpen(false); router.push(route); }}
+              >
+                {/* RTL row: first child → right, second → left */}
+                <Image source={icon} style={{ width: 20, height: 20 }} resizeMode="contain" />
+                <Text style={{ flex: 1, fontSize: 14, fontWeight: '500', color: '#111827', textAlign: 'left' }}>
+                  {t(labelKey)}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </>
       )}
     </SafeAreaView>
   );
