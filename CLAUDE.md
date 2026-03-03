@@ -1,5 +1,9 @@
 # mi bagina — Build Spec & Constraints
 
+## Design System
+
+**`DESIGN.md` is the single source of truth for all UI work** — colors, typography, component shapes, screen patterns, icons, assets, and RTL layout. Read it before writing or modifying any screen or component. The canonical brand green is `#3D7A50` (not `#16a34a`).
+
 ## ⚠️ Critical Invariants (Read Before Every Task)
 
 - **Deep-link scheme is `mibagina`** — not migagina, not mi-bagina. Use this exact string everywhere: app.json, invite link generation, join/[token].tsx handler, and all documentation.
@@ -198,11 +202,15 @@ Race note: concurrent inserts can both pass before trigger fires. Acceptable for
 
 ```
 app/
-  (auth)/    login.tsx  signup.tsx  name.tsx
+  (auth)/    landing.tsx  login.tsx  signup.tsx  name.tsx
+             children.tsx  groups-onboard.tsx  notifications-ask.tsx
   (tabs)/    index.tsx  children.tsx  groups.tsx  profile.tsx
+  auth/      callback.tsx  (OAuth callback)
   playground/[id].tsx
   checkin/index.tsx
   join/[token].tsx
+  add-child.tsx
+  reset-password.tsx
 ```
 
 ---

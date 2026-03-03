@@ -4,7 +4,7 @@
     "target": {
       "namespace": "android_app",
       "package_name": "com.mibagina.app",
-      "sha256_cert_fingerprints": ["YOUR_SHA256_FINGERPRINT"]
+      "sha256_cert_fingerprints": ["98:F3:85:CF:E2:F4:E9:8F:E4:16:50:D8:BB:8F:98:34:CF:57:B8:05:10:E9:DA:D1:5E:20:2C:65:78:75:0C:43"]
     }
   }
 ]
