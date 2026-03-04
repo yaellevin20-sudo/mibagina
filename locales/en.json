@@ -97,6 +97,7 @@
     "share_invite": "Share invite",
     "rename": "Rename",
     "rename_title": "Rename group",
+    "rename_placeholder": "E.g. 'Narcissus Park' or 'Yochanan St. kids'",
     "view_members": "View members",
     "leave_group": "Leave group",
     "delete_group": "Delete group",

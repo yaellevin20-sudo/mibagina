@@ -10,9 +10,11 @@ import {
   Image,
   Modal,
   TextInput,
-  KeyboardAvoidingView,
-  Platform,
+  Dimensions,
 } from 'react-native';
+import EmojiPicker, { type EmojiType } from 'rn-emoji-keyboard';
+
+const { width: screenWidth } = Dimensions.get('window');
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -20,6 +22,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import {
   getGroupMembers,
   renameGroup,
+  setGroupEmoji as setGroupEmojiRpc,
   deleteGroup,
   removeGuardianFromGroup,
   removeChildFromGroup,
@@ -120,109 +123,132 @@ function DeleteGroupModal({
 }
 
 // ---------------------------------------------------------------------------
-// Local text input modal (for rename)
+// Rename Group Modal
 // ---------------------------------------------------------------------------
-function TextInputModal({
+function RenameGroupModal({
   visible,
-  title,
-  initialValue,
-  submitLabel,
+  groupName,
+  groupEmoji,
   onClose,
-  onSubmit,
+  onSave,
 }: {
   visible: boolean;
-  title: string;
-  initialValue?: string;
-  submitLabel: string;
+  groupName: string;
+  groupEmoji: string;
   onClose: () => void;
-  onSubmit: (value: string) => Promise<void>;
+  onSave: (name: string, emoji: string) => Promise<void>;
 }) {
   const { t } = useTranslation();
-  const [value, setValue]     = useState(initialValue ?? '');
-  const [loading, setLoading] = useState(false);
-  const [error, setError]     = useState<string | null>(null);
+  const [draftName, setDraftName]   = useState(groupName);
+  const [draftEmoji, setDraftEmoji] = useState(groupEmoji);
+  const [emojiOpen, setEmojiOpen]   = useState(false);
+  const [loading, setLoading]       = useState(false);
 
   useEffect(() => {
-    if (visible) setValue(initialValue ?? '');
-  }, [visible, initialValue]);
+    if (visible) {
+      setDraftName(groupName);
+      setDraftEmoji(groupEmoji);
+      setEmojiOpen(false);
+    }
+  }, [visible, groupName, groupEmoji]);
 
-  async function handleSubmit() {
-    const trimmed = value.trim();
-    if (!trimmed) { setError(t('errors.generic')); return; }
-    setError(null);
+  async function handleSave() {
+    const trimmed = draftName.trim();
+    if (!trimmed) return;
     setLoading(true);
     try {
-      await onSubmit(trimmed);
-      setValue('');
-    } catch (e: any) {
-      setError(e.message ?? t('errors.generic'));
+      await onSave(trimmed, draftEmoji);
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
-      <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
-        <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-          <View
+    <>
+      <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+        <TouchableOpacity
+          style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.43)', alignItems: 'center', justifyContent: 'center' }}
+          activeOpacity={1}
+          onPress={onClose}
+        >
+          <TouchableOpacity
+            activeOpacity={1}
             style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              paddingHorizontal: 16,
-              paddingVertical: 16,
-              borderBottomWidth: 1,
-              borderBottomColor: '#e5e7eb',
+              backgroundColor: 'white',
+              borderRadius: 14,
+              width: screenWidth - 32,
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.3,
+              shadowRadius: 8,
+              elevation: 8,
+              overflow: 'hidden',
             }}
           >
-            <TouchableOpacity onPress={onClose} disabled={loading}>
-              <Text style={{ color: '#6b7280', fontSize: 16 }}>{t('common.cancel')}</Text>
-            </TouchableOpacity>
-            <Text style={{ fontSize: 18, fontWeight: '600' }}>{title}</Text>
-            <View style={{ width: 56 }} />
-          </View>
-          <View style={{ paddingHorizontal: 16, paddingTop: 24 }}>
-            {error && (
-              <Text style={{ color: '#ef4444', fontSize: 14, marginBottom: 16 }}>{error}</Text>
-            )}
-            <TextInput
-              style={{
-                borderWidth: 1,
-                borderColor: '#d1d5db',
-                borderRadius: 8,
-                paddingHorizontal: 16,
-                paddingVertical: 12,
-                marginBottom: 24,
-                fontSize: 16,
-              }}
-              value={value}
-              onChangeText={setValue}
-              autoFocus
-              editable={!loading}
-              returnKeyType="done"
-              onSubmitEditing={handleSubmit}
-            />
-            <TouchableOpacity
-              style={{
-                backgroundColor: loading ? '#d1d5db' : BRAND_GREEN,
-                borderRadius: 8,
-                paddingVertical: 16,
+            <View style={{ padding: 20, paddingBottom: 16 }}>
+              {/* Header: RTL → title RIGHT (first), × LEFT (second) */}
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
+                <Text style={{ fontSize: 18, fontWeight: '600', color: '#111' }}>
+                  {t('groups.rename_title')}
+                </Text>
+                <TouchableOpacity onPress={onClose} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                  <Text style={{ fontSize: 20, color: '#9ca3af', lineHeight: 22 }}>×</Text>
+                </TouchableOpacity>
+              </View>
+
+              {/* Input: RTL → emoji RIGHT (first), text LEFT (second) */}
+              <View style={{
+                flexDirection: 'row',
                 alignItems: 'center',
-              }}
-              onPress={handleSubmit}
-              disabled={loading}
-            >
-              {loading ? (
-                <ActivityIndicator color="white" />
-              ) : (
-                <Text style={{ color: 'white', fontWeight: '600', fontSize: 16 }}>{submitLabel}</Text>
-              )}
-            </TouchableOpacity>
-          </View>
-        </KeyboardAvoidingView>
-      </SafeAreaView>
-    </Modal>
+                borderWidth: 1,
+                borderColor: BRAND_GREEN,
+                borderRadius: 10,
+                height: 48,
+              }}>
+                <TouchableOpacity
+                  style={{ paddingHorizontal: 13, height: '100%', alignItems: 'center', justifyContent: 'center' }}
+                  onPress={() => setEmojiOpen(true)}
+                >
+                  <Text style={{ fontSize: 22 }}>{draftEmoji || '🌳'}</Text>
+                </TouchableOpacity>
+                <View style={{ width: 1, height: 28, backgroundColor: '#d1d5db' }} />
+                <TextInput
+                  style={{ flex: 1, paddingHorizontal: 12, fontSize: 16, color: '#111', textAlign: 'right' }}
+                  value={draftName}
+                  onChangeText={setDraftName}
+                  autoFocus
+                  placeholder={t('groups.rename_placeholder')}
+                  placeholderTextColor="#b0b7c0"
+                  editable={!loading}
+                  returnKeyType="done"
+                  onSubmitEditing={handleSave}
+                />
+              </View>
+            </View>
+
+            {/* Actions: RTL flex-end → cancel RIGHT (first), save LEFT (second) */}
+            <View style={{ flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: 20, paddingBottom: 20, gap: 20 }}>
+              <TouchableOpacity onPress={onClose} disabled={loading}>
+                <Text style={{ fontSize: 16, fontWeight: '500', color: '#111' }}>{t('common.cancel')}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handleSave} disabled={loading || !draftName.trim()}>
+                {loading ? (
+                  <ActivityIndicator color={BRAND_GREEN} size="small" />
+                ) : (
+                  <Text style={{ fontSize: 16, fontWeight: '600', color: BRAND_GREEN }}>{t('common.save')}</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
+
+      <EmojiPicker
+        onEmojiSelected={(e: EmojiType) => { setDraftEmoji(e.emoji); setEmojiOpen(false); }}
+        open={emojiOpen}
+        onClose={() => setEmojiOpen(false)}
+      />
+    </>
   );
 }
 
@@ -254,6 +280,7 @@ export default function GroupDetailScreen() {
   const [members, setMembers]               = useState<GroupMember[]>([]);
   const [loading, setLoading]               = useState(true);
   const [groupName, setGroupName]           = useState(initialName ?? '');
+  const [savedEmoji, setSavedEmoji]         = useState(emoji ?? '🌳');
   const [menuOpen, setMenuOpen]             = useState(false);
   const [showRename, setShowRename]         = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -430,7 +457,7 @@ export default function GroupDetailScreen() {
           elevation: 2,
         }}
       >
-        <Text style={{ fontSize: 72 }}>{emoji || '🌳'}</Text>
+        <Text style={{ fontSize: 72 }}>{savedEmoji}</Text>
         <Text style={{ fontSize: 26, fontWeight: '600', color: '#111', marginTop: 4 }}>
           {groupName}
         </Text>
@@ -699,15 +726,16 @@ export default function GroupDetailScreen() {
       )}
 
       {/* Rename modal */}
-      <TextInputModal
+      <RenameGroupModal
         visible={showRename}
-        title={t('groups.rename_title')}
-        initialValue={groupName}
-        submitLabel={t('common.save')}
+        groupName={groupName}
+        groupEmoji={savedEmoji}
         onClose={() => setShowRename(false)}
-        onSubmit={async (name) => {
+        onSave={async (name, newEmoji) => {
           await renameGroup(id as string, name);
+          if (newEmoji !== savedEmoji) await setGroupEmojiRpc(id as string, newEmoji);
           setGroupName(name);
+          setSavedEmoji(newEmoji);
           setShowRename(false);
         }}
       />
