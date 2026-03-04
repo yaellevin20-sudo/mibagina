@@ -36,6 +36,7 @@ skills-lock.json
 
 # Design review mockups
 *.html
+!docs/*.html
 *.pem
 
 # local env files
