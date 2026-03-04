@@ -637,7 +637,7 @@ export default function HomeScreen() {
           <View style={{
             position: 'absolute',
             top: insets.top + 56,
-            left: 12,
+            right: 12,
             zIndex: 51,
             backgroundColor: 'white',
             borderRadius: 10,
@@ -660,15 +660,15 @@ export default function HomeScreen() {
                   flexDirection: 'row',
                   alignItems: 'center',
                   paddingHorizontal: 14,
+                  gap: 10,
                   height: 48,
                   borderTopWidth: idx > 0 ? 1 : 0,
                   borderTopColor: '#f3f4f6',
                 }}
                 onPress={() => { setMenuOpen(false); router.push(route); }}
               >
-                {/* RTL row: first child → right, second → left */}
                 <Image source={icon} style={{ width: 20, height: 20 }} resizeMode="contain" />
-                <Text style={{ flex: 1, fontSize: 14, fontWeight: '500', color: '#111827', textAlign: 'left' }}>
+                <Text style={{ flex: 1, fontSize: 14, fontWeight: '500', color: '#111827', textAlign: 'right' }}>
                   {t(labelKey)}
                 </Text>
               </TouchableOpacity>

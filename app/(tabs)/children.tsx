@@ -52,6 +52,7 @@ function ChildCard({
       {/* Groups / hint */}
       {child.groups.length > 0 ? (
         <Text className="text-sm font-rubik text-gray-500 mt-1">
+          <Text className="font-rubik-medium">{t('children.member_of_groups')} </Text>
           {child.groups.map((g) => g.name).join(', ')}
         </Text>
       ) : (

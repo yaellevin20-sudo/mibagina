@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -83,7 +83,7 @@ function DeleteGroupModal({
           <View style={{ padding: 20, paddingBottom: 12 }}>
             {/* Header: RTL → title RIGHT (first), × LEFT (second) */}
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14 }}>
-              <Text style={{ fontSize: 18, fontWeight: '600', color: '#111' }}>
+              <Text style={{ fontSize: 18, fontWeight: '600', color: '#111', flex: 1, textAlign: 'right' }}>
                 {t('groups.delete_group')}
               </Text>
               <TouchableOpacity onPress={onClose} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
@@ -101,16 +101,16 @@ function DeleteGroupModal({
               <ActivityIndicator color={BRAND_GREEN} />
             ) : (
               <>
-                {/* מחיקה first → physical RIGHT in RTL */}
-                <TouchableOpacity onPress={handleDelete}>
-                  <Text style={{ fontSize: 16, fontWeight: '600', color: '#ef4444' }}>
-                    {t('groups.delete_group')}
-                  </Text>
-                </TouchableOpacity>
-                {/* ביטול second → physical LEFT */}
+                {/* ביטול first → physical RIGHT in RTL */}
                 <TouchableOpacity onPress={onClose}>
                   <Text style={{ fontSize: 16, fontWeight: '500', color: BRAND_GREEN }}>
                     {t('common.cancel')}
+                  </Text>
+                </TouchableOpacity>
+                {/* מחיקה second → physical LEFT */}
+                <TouchableOpacity onPress={handleDelete}>
+                  <Text style={{ fontSize: 16, fontWeight: '600', color: '#ef4444' }}>
+                    {t('groups.delete_group')}
                   </Text>
                 </TouchableOpacity>
               </>
@@ -243,11 +243,15 @@ function RenameGroupModal({
         </TouchableOpacity>
       </Modal>
 
-      <EmojiPicker
-        onEmojiSelected={(e: EmojiType) => { setDraftEmoji(e.emoji); setEmojiOpen(false); }}
-        open={emojiOpen}
-        onClose={() => setEmojiOpen(false)}
-      />
+      <View style={{ direction: 'ltr' }}>
+        <EmojiPicker
+          onEmojiSelected={(e: EmojiType) => { setDraftEmoji(e.emoji); setEmojiOpen(false); }}
+          open={emojiOpen}
+          onClose={() => setEmojiOpen(false)}
+          categoryPosition="top"
+          categoryOrder={['smileys_emotion', 'people_body', 'animals_nature', 'food_drink', 'travel_places', 'activities', 'objects', 'symbols', 'flags', 'recently_used', 'search']}
+        />
+      </View>
     </>
   );
 }
@@ -280,7 +284,7 @@ export default function GroupDetailScreen() {
   const [members, setMembers]               = useState<GroupMember[]>([]);
   const [loading, setLoading]               = useState(true);
   const [groupName, setGroupName]           = useState(initialName ?? '');
-  const [savedEmoji, setSavedEmoji]         = useState(emoji ?? '🌳');
+  const [savedEmoji, setSavedEmoji]         = useState(emoji || '🌳');
   const [menuOpen, setMenuOpen]             = useState(false);
   const [showRename, setShowRename]         = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -678,7 +682,7 @@ export default function GroupDetailScreen() {
             style={{
               position: 'absolute',
               top: insets.top + 60,
-              left: 16,
+              right: 16,
               zIndex: 51,
               backgroundColor: 'white',
               borderRadius: 10,

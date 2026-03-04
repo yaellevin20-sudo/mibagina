@@ -81,6 +81,7 @@
     "date_of_birth_hint": "YYYY-MM-DD",
     "confirm_remove": "Remove {{name}}?",
     "years_old": "Age {{age}}",
+    "member_of_groups": "Member of:",
     "no_groups_hint": "Join a group to see friends at the playground",
     "back_to_join": "Done adding children? Tap to continue joining the group →"
   },
@@ -147,8 +148,8 @@
     "login": "Log in",
     "signup": "Sign up",
     "logout": "Log out",
-    "display_name": "Display name",
-    "display_name_placeholder": "What should we call you?",
+    "display_name": "Full name",
+    "display_name_placeholder": "First and last name",
     "email_verification_required": "Email verification required before joining groups",
     "continue_with_google": "Continue with Google",
     "forgot_password": "Forgot password?",
@@ -166,7 +167,7 @@
   },
   "profile": {
     "title": "My Profile",
-    "display_name": "Display name",
+    "display_name": "Full name",
     "edit_name": "Edit name",
     "email_label": "Email",
     "change_email": "Change email",
