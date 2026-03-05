@@ -2,7 +2,7 @@ import '../global.css';
 import '../lib/i18n';
 
 import { useEffect, useRef, useState } from 'react';
-import { I18nManager, View, Text, TouchableOpacity } from 'react-native';
+import { I18nManager, View, Text, TouchableOpacity, Dimensions } from 'react-native';
 import { useFonts, Rubik_400Regular, Rubik_500Medium, Rubik_600SemiBold, Rubik_700Bold } from '@expo-google-fonts/rubik';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -24,45 +24,48 @@ if (I18nManager.isRTL !== isHebrew) {
 }
 
 // Fully custom compact toast — avoids BaseToast sizing quirks.
+const SCREEN_W = Dimensions.get('window').width;
 function CompactToast({ type, text1, text2, onPress }: BaseToastProps) {
   const borderColor = type === 'error' ? '#dc2626' : type === 'info' ? '#9ca3af' : '#3D7A50';
   return (
-    <TouchableOpacity
-      activeOpacity={0.85}
-      onPress={() => { onPress?.(); Toast.hide(); }}
-      style={{
-        alignSelf: 'center',
-        width: 280,
-        backgroundColor: 'white',
-        borderRadius: 10,
-        borderRightWidth: 3,
-        borderRightColor: borderColor,
-        paddingHorizontal: 12,
-        paddingVertical: 10,
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 8,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.10,
-        shadowRadius: 6,
-        elevation: 4,
-      }}
-    >
-      <View style={{ flex: 1 }}>
-        {!!text1 && (
-          <Text style={{ fontSize: 13, color: '#111827', fontFamily: 'Rubik_400Regular', textAlign: 'right' }}>
-            {text1}
-          </Text>
-        )}
-        {!!text2 && (
-          <Text style={{ fontSize: 11.5, color: '#6b7280', fontFamily: 'Rubik_400Regular', marginTop: 2, textAlign: 'right' }}>
-            {text2}
-          </Text>
-        )}
-      </View>
-      <Text style={{ fontSize: 16, color: '#9ca3af', lineHeight: 20 }}>×</Text>
-    </TouchableOpacity>
+    // Full-width wrapper ensures centering regardless of RTL direction
+    <View style={{ width: SCREEN_W, alignItems: 'center' }}>
+      <TouchableOpacity
+        activeOpacity={0.85}
+        onPress={() => { onPress?.(); Toast.hide(); }}
+        style={{
+          width: 280,
+          backgroundColor: 'white',
+          borderRadius: 10,
+          borderRightWidth: 3,
+          borderRightColor: borderColor,
+          paddingHorizontal: 12,
+          paddingVertical: 10,
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 8,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.10,
+          shadowRadius: 6,
+          elevation: 4,
+        }}
+      >
+        <View style={{ flex: 1 }}>
+          {!!text1 && (
+            <Text style={{ fontSize: 13, color: '#111827', fontFamily: 'Rubik_400Regular', textAlign: 'right' }}>
+              {text1}
+            </Text>
+          )}
+          {!!text2 && (
+            <Text style={{ fontSize: 11.5, color: '#6b7280', fontFamily: 'Rubik_400Regular', marginTop: 2, textAlign: 'right' }}>
+              {text2}
+            </Text>
+          )}
+        </View>
+        <Text style={{ fontSize: 16, color: '#9ca3af', lineHeight: 20 }}>×</Text>
+      </TouchableOpacity>
+    </View>
   );
 }
 const toastConfig = {

@@ -456,9 +456,8 @@ export default function HomeScreen() {
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          style={{ backgroundColor: '#f1fdf5' }}
-          className="px-5 pb-2"
-          contentContainerStyle={{ paddingHorizontal: 4, gap: 8 }}
+          style={{ backgroundColor: '#f1fdf5', height: 44, flexShrink: 0 }}
+          contentContainerStyle={{ paddingHorizontal: 20, gap: 8, alignItems: 'center' }}
         >
           {groups.map((g) => (
             <TouchableOpacity
