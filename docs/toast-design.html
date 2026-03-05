@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Toast Design – Mi Bagina</title>
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --green: #3D7A50;
+      --green-soft: #E4F2EA;
+      --green-dark: #2A5537;
+      --red: #dc2626;
+      --red-soft: #fef2f2;
+      --blue: #2563eb;
+      --blue-soft: #eff6ff;
+      --ink: #111827;
+      --mid: #6b7280;
+      --border: #e5e7eb;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Rubik', sans-serif;
+      background: #f3f4f6;
+      padding: 32px 16px 64px;
+    }
+
+    h1 {
+      font-size: 13px;
+      font-weight: 600;
+      color: #9ca3af;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+
+    /* Phone frame */
+    .phone {
+      width: 375px;
+      margin: 0 auto;
+      background: #f9fafb;
+      border-radius: 40px;
+      border: 8px solid #1f2937;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 32px 64px rgba(0,0,0,.25);
+    }
+    .phone-inner {
+      padding: 16px 0 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    /* Section labels inside phone */
+    .section-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: #9ca3af;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: 20px 16px 8px;
+    }
+
+    /* ── Toast component ── */
+    .toast {
+      margin: 4px 12px;
+      border-radius: 10px;
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.10), 0 1px 2px rgba(0,0,0,.06);
+      position: relative;
+      direction: rtl;
+    }
+
+    /* Variants */
+    .toast-success { background: white; border-right: 3px solid var(--green); }
+    .toast-error   { background: white; border-right: 3px solid var(--red); }
+    .toast-info    { background: white; border-right: 3px solid #9ca3af; }
+    .toast-push    { background: #1f2d23; border-right: 3px solid #6DC98A; }
+
+    .toast-icon {
+      font-size: 14px;
+      flex-shrink: 0;
+      width: 18px;
+      text-align: center;
+    }
+
+    .toast-body { flex: 1; min-width: 0; }
+
+    .toast-title {
+      font-size: 13px;
+      font-weight: 400;
+      line-height: 1.35;
+      color: var(--ink);
+    }
+    .toast-push .toast-title { color: white; }
+
+    .toast-sub {
+      font-size: 11.5px;
+      font-weight: 400;
+      color: var(--mid);
+      margin-top: 1px;
+      line-height: 1.3;
+    }
+    .toast-push .toast-sub { color: rgba(255,255,255,.6); }
+
+    .toast-action {
+      font-size: 12px;
+      font-weight: 500;
+      white-space: nowrap;
+      flex-shrink: 0;
+      padding-right: 4px;
+    }
+    .toast-success .toast-action { color: var(--green); }
+    .toast-error   .toast-action { color: var(--red); }
+    .toast-info    .toast-action { color: var(--mid); }
+    .toast-push    .toast-action { color: #6DC98A; }
+
+    /* Divider */
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 12px 16px 0;
+    }
+
+    /* Legend */
+    .legend {
+      width: 375px;
+      margin: 24px auto 0;
+      background: white;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+    .legend-header {
+      background: #f9fafb;
+      border-bottom: 1px solid var(--border);
+      padding: 12px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--mid);
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      direction: ltr;
+    }
+    .legend-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      direction: ltr;
+    }
+    .legend-row:last-child { border-bottom: none; }
+    .legend-num {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #f3f4f6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--mid);
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .legend-content { flex: 1; }
+    .legend-trigger { font-size: 13px; font-weight: 600; color: var(--ink); }
+    .legend-status {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 20px;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+    .status-done    { background: var(--green-soft); color: var(--green-dark); }
+    .status-missing { background: #fef3c7; color: #92400e; }
+    .legend-note { font-size: 12px; color: var(--mid); margin-top: 2px; }
+  </style>
+</head>
+<body>
+
+<h1>Toast Notifications — Mi Bagina</h1>
+
+<div class="phone">
+  <div class="phone-inner">
+
+    <div class="section-label">הצלחה (Success)</div>
+
+    <!-- 1. Joined group -->
+    <div class="toast toast-success">
+      <div class="toast-icon">✓</div>
+      <div class="toast-body">
+        <div class="toast-title">הצטרפתם לקבוצה בהצלחה!</div>
+      </div>
+      <div class="toast-action">אישור</div>
+    </div>
+
+    <!-- 2. Group created -->
+    <div class="toast toast-success">
+      <div class="toast-icon">✓</div>
+      <div class="toast-body">
+        <div class="toast-title">הקבוצה נוצרה בהצלחה</div>
+      </div>
+      <div class="toast-action">ביטול</div>
+    </div>
+
+    <!-- 3. Group deleted -->
+    <div class="toast toast-success">
+      <div class="toast-icon">✓</div>
+      <div class="toast-body">
+        <div class="toast-title">הקבוצה 'הפרלמנט של קוין' נמחקה</div>
+      </div>
+      <div class="toast-action">ביטול</div>
+    </div>
+
+    <!-- 4. Members removed -->
+    <div class="toast toast-success">
+      <div class="toast-icon">✓</div>
+      <div class="toast-body">
+        <div class="toast-title">חברי הקבוצה הוסרו בהצלחה</div>
+      </div>
+      <div class="toast-action">ביטול</div>
+    </div>
+
+    <!-- 5. Child added -->
+    <div class="toast toast-success">
+      <div class="toast-icon">✓</div>
+      <div class="toast-body">
+        <div class="toast-title">הילד נוסף בהצלחה</div>
+      </div>
+      <div class="toast-action">ביטול</div>
+    </div>
+
+    <div class="divider"></div>
+    <div class="section-label">שגיאה ומידע (Error & Info)</div>
+
+    <!-- 6. Already a member -->
+    <div class="toast toast-info">
+      <div class="toast-icon">ℹ</div>
+      <div class="toast-body">
+        <div class="toast-title">אתם כבר חלק מקבוצה זו</div>
+      </div>
+      <div class="toast-action">אישור</div>
+    </div>
+
+    <!-- 7. Can't delete during active visit -->
+    <div class="toast toast-error">
+      <div class="toast-icon">✕</div>
+      <div class="toast-body">
+        <div class="toast-title">לא ניתן למחוק קבוצה בזמן ביקור פעיל</div>
+        <div class="toast-sub">יש להמתין עד סיום הביקור</div>
+      </div>
+      <div class="toast-action">אישור</div>
+    </div>
+
+    <div class="divider"></div>
+    <div class="section-label">פוש (Push / Foreground)</div>
+
+    <!-- 8a. First child arrives (strong event) -->
+    <div class="toast toast-push">
+      <div class="toast-icon">🌳</div>
+      <div class="toast-body">
+        <div class="toast-title">הפרלמנט של קוין - ילד ראשון בגינה</div>
+        <div class="toast-sub">שון עכשיו בגינת הרחוב</div>
+      </div>
+      <div class="toast-action">צפייה</div>
+    </div>
+
+    <!-- 8b. Multiple children arrive together -->
+    <div class="toast toast-push">
+      <div class="toast-icon">🌳</div>
+      <div class="toast-body">
+        <div class="toast-title">הפרלמנט של קוין - 3 ילדים בגינה</div>
+        <div class="toast-sub">שון ונועה בגינת הרחוב</div>
+      </div>
+      <div class="toast-action">צפייה</div>
+    </div>
+
+    <!-- 8c. Child joins existing group at playground -->
+    <div class="toast toast-push">
+      <div class="toast-icon">🌳</div>
+      <div class="toast-body">
+        <div class="toast-title">הפרלמנט של קוין - 3 ילדים בגינה</div>
+        <div class="toast-sub">שון הצטרף לגינת הרחוב</div>
+      </div>
+      <div class="toast-action">צפייה</div>
+    </div>
+
+    <!-- 9. Group renamed push -->
+    <div class="toast toast-push">
+      <div class="toast-icon">✏️</div>
+      <div class="toast-body">
+        <div class="toast-title">"ילדי הרחוב" שונה ל-"הפרלמנט של קוין"</div>
+        <div class="toast-sub">שם הקבוצה עודכן</div>
+      </div>
+      <div class="toast-action">צפייה</div>
+    </div>
+
+    <!-- 10. Group deleted push -->
+    <div class="toast toast-push">
+      <div class="toast-icon">🗑</div>
+      <div class="toast-body">
+        <div class="toast-title">קבוצת 'הפרלמנט של קוין' נמחקה</div>
+        <div class="toast-sub">לחץ לצפייה בקבוצות שלך</div>
+      </div>
+      <div class="toast-action">צפייה</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Implementation status legend -->
+<div class="legend">
+  <div class="legend-header">Implementation Status</div>
+
+  <div class="legend-row">
+    <div class="legend-num">1</div>
+    <div class="legend-content">
+      <div class="legend-trigger">
+        <span class="legend-status status-done">✓ in code</span>
+        Joined group
+      </div>
+      <div class="legend-note">join/[token].tsx → Toast.show success</div>
+    </div>
+  </div>
+
+  <div class="legend-row">
+    <div class="legend-num">2</div>
+    <div class="legend-content">
+      <div class="legend-trigger">
+        <span class="legend-status status-missing">⚠ missing</span>
+        Group created
+      </div>
+      <div class="legend-note">groups.tsx createGroup — no toast, just refreshes</div>
+    </div>
+  </div>
+
+  <div class="legend-row">
+    <div class="legend-num">3</div>
+    <div class="legend-content">
+      <div class="legend-trigger">
+        <span class="legend-status status-done">✓ in code</span>
+        Group deleted
+      </div>
+      <div class="legend-note">groups.tsx → Toast.show group_deleted_toast</div>
+    </div>
+  </div>
+
+  <div class="legend-row">
+    <div class="legend-num">4</div>
+    <div class="legend-content">
+      <div class="legend-trigger">
+        <span class="legend-status status-missing">⚠ missing</span>
+        Members removed
+      </div>
+      <div class="legend-note">group/edit-members.tsx — uses Alert, no toast</div>
+    </div>
+  </div>
+
+  <div class="legend-row">
+    <div class="legend-num">5</div>
+    <div class="legend-content">
+      <div class="legend-trigger">
+        <span class="legend-status status-missing">⚠ missing</span>
+        Child added
+      </div>
+      <div class="legend-note">add-child.tsx — just router.back(), no toast</div>
+    </div>
+  </div>
+
+  <div class="legend-row">
+    <div class="legend-num">6</div>
+    <div class="legend-content">
+      <div class="legend-trigger">
+        <span class="legend-status status-missing">⚠ missing</span>
+        Already a member
+      </div>
+      <div class="legend-note">join/[token].tsx — shown as inline error text, not toast</div>
+    </div>
+  </div>
+
+  <div class="legend-row">
+    <div class="legend-num">7</div>
+    <div class="legend-content">
+      <div class="legend-trigger">
+        <span class="legend-status status-missing">⚠ missing</span>
+        Can't delete during active visit
+      </div>
+      <div class="legend-note">group/[id].tsx — uses Alert.alert, not toast</div>
+    </div>
+  </div>
+
+  <div class="legend-row">
+    <div class="legend-num">8</div>
+    <div class="legend-content">
+      <div class="legend-trigger">
+        <span class="legend-status status-done">✓ in code</span>
+        Friend checked in (push foreground)
+      </div>
+      <div class="legend-note">_layout.tsx group_checkin — not in Figma map</div>
+    </div>
+  </div>
+
+  <div class="legend-row">
+    <div class="legend-num">9</div>
+    <div class="legend-content">
+      <div class="legend-trigger">
+        <span class="legend-status status-done">✓ in code</span>
+        Group deleted push (foreground)
+      </div>
+      <div class="legend-note">_layout.tsx group_deleted — not in Figma map</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
