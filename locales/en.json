@@ -229,6 +229,7 @@
     "already_member": "You're already a member of this group"
   },
   "menu": {
+    "home": "Home",
     "my_children": "My Children",
     "my_groups": "My Groups",
     "my_profile": "My Profile"

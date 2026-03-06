@@ -246,28 +246,6 @@ export default function ChildrenScreen() {
         />
       )}
 
-      {/* FAB — home icon */}
-      <TouchableOpacity
-        onPress={() => router.replace('/(tabs)')}
-        style={{
-          position: 'absolute',
-          bottom: 64,
-          left: 16,
-          width: 56,
-          height: 56,
-          borderRadius: 28,
-          backgroundColor: 'white',
-          alignItems: 'center',
-          justifyContent: 'center',
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.3,
-          shadowRadius: 8,
-          elevation: 8,
-        }}
-      >
-        <Image source={require('../../assets/home-fab.png')} style={{ width: 24, height: 24 }} resizeMode="contain" />
-      </TouchableOpacity>
 
       {/* Hamburger dropdown menu */}
       {menuOpen && (
@@ -293,6 +271,7 @@ export default function ChildrenScreen() {
             overflow: 'hidden',
           }}>
             {([
+              { labelKey: 'menu.home',         icon: require('../../assets/Home-menu.png'),    route: '/(tabs)'          },
               { labelKey: 'menu.my_children', icon: require('../../assets/icons/Heart.png'),  route: '/(tabs)/children' },
               { labelKey: 'menu.my_groups',   icon: require('../../assets/icons/groups.png'), route: '/(tabs)/groups'   },
               { labelKey: 'menu.my_profile',  icon: require('../../assets/person.png'), route: '/(tabs)/profile'  },
